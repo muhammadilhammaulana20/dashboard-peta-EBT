@@ -15,19 +15,36 @@ def _load_data():
     return []
 
 
-def _get_province_list(data):
-    provs = sorted(set(v["provinsi"] for v in data))
-    prov_data = []
-    for p in provs:
-        filtered = [v for v in data if v["provinsi"] == p]
-        prov_data.append({
-            "provinsi": p,
-            "jumlah_desa": len(filtered),
-            "rata_skor": round(sum(v["skor_prioritas"] for v in filtered) / len(filtered), 1),
-            "total_kk": sum(v["kk_terdampak"] for v in filtered),
-            "total_potensi_mw": round(sum(v["potensi_ebt_mw"] for v in filtered), 1),
-        })
-    return prov_data
+@api.route("/health")
+def health():
+    return jsonify({"status": "ok", "app": "PETA-EBT API", "version": "2.0.0", "metode": "AHP"})
+
+
+@api.route("/summary")
+def get_summary():
+    data = _load_data()
+    if not data:
+        return jsonify({"error": "No data"}), 404
+
+    total_belum = sum(v.get("kk_belum_listrik", 0) for v in data)
+    total_kk = sum(v.get("kk_terdampak", 0) for v in data)
+    total_penghematan = sum(v.get("estimasi_penghematan_tahunan", 0) for v in data)
+    total_biaya = sum(v.get("estimasi_biaya_proyek", 0) for v in data)
+    rata_ipm = round(sum(v.get("ipm", 0) for v in data) / len(data), 1)
+    rata_kemiskinan = round(sum(v.get("kemiskinan", 0) for v in data) / len(data), 1)
+    rata_skor = round(sum(v.get("skor_ahp", 0) for v in data) / len(data), 1)
+
+    return jsonify({
+        "total_desa": len(data),
+        "total_provinsi": len(set(v["provinsi"] for v in data)),
+        "total_kk_belum_listrik": total_belum,
+        "total_kk_terdampak": total_kk,
+        "total_penghematan_tahunan": total_penghematan,
+        "total_estimasi_biaya": total_biaya,
+        "rata_ipm": rata_ipm,
+        "rata_kemiskinan": rata_kemiskinan,
+        "rata_skor_ahp": rata_skor,
+    })
 
 
 @api.route("/villages")
@@ -35,12 +52,8 @@ def get_villages():
     data = _load_data()
     prov = request.args.get("provinsi")
     search = request.args.get("search", "").lower()
-    min_skor = request.args.get("min_skor", type=float)
-    max_skor = request.args.get("max_skor", type=float)
-    sort_by = request.args.get("sort_by", "skor_prioritas")
-    sort_dir = request.args.get("sort_dir", "desc")
     page = request.args.get("page", 1, type=int)
-    per_page = request.args.get("per_page", 100, type=int)
+    per_page = request.args.get("per_page", 50, type=int)
 
     result = data[:]
     if prov:
@@ -51,14 +64,6 @@ def get_villages():
                   search in v["kecamatan"].lower() or
                   search in v["kabupaten"].lower() or
                   search in v["provinsi"].lower()]
-    if min_skor is not None:
-        result = [v for v in result if v["skor_prioritas"] >= min_skor]
-    if max_skor is not None:
-        result = [v for v in result if v["skor_prioritas"] <= max_skor]
-
-    reverse = sort_dir == "desc"
-    if sort_by in result[0] if result else False:
-        result.sort(key=lambda v: v.get(sort_by, 0), reverse=reverse)
 
     total = len(result)
     start = (page - 1) * per_page
@@ -82,27 +87,22 @@ def get_village(village_id):
     return jsonify({"error": "Village not found"}), 404
 
 
-@api.route("/summary")
-def get_summary():
-    data = _load_data()
-    if not data:
-        return jsonify({"error": "No data"}), 404
-
-    return jsonify({
-        "total_desa": len(data),
-        "total_provinsi": len(set(v["provinsi"] for v in data)),
-        "total_kk_terdampak": sum(v["kk_terdampak"] for v in data),
-        "total_potensi_ebt_mw": round(sum(v["potensi_ebt_mw"] for v in data), 1),
-        "total_penghematan_tahunan": sum(v["estimasi_penghematan_tahunan"] for v in data),
-        "rata_skor": round(sum(v["skor_prioritas"] for v in data) / len(data), 1),
-        "total_estimasi_biaya": sum(v["estimasi_biaya_proyek"] for v in data),
-    })
-
-
 @api.route("/stats/provinces")
 def get_province_stats():
     data = _load_data()
-    return jsonify(_get_province_list(data))
+    provs = sorted(set(v["provinsi"] for v in data))
+    result = []
+    for p in provs:
+        filtered = [v for v in data if v["provinsi"] == p]
+        result.append({
+            "provinsi": p,
+            "jumlah_desa": len(filtered),
+            "rata_skor_ahp": round(sum(v["skor_ahp"] for v in filtered) / len(filtered), 1),
+            "total_kk": sum(v["kk_terdampak"] for v in filtered),
+            "rata_ipm": round(sum(v["ipm"] for v in filtered) / len(filtered), 1),
+            "rata_kemiskinan": round(sum(v["kemiskinan"] for v in filtered) / len(filtered), 1),
+        })
+    return jsonify(result)
 
 
 @api.route("/stats/technology")
@@ -124,7 +124,7 @@ def get_score_distribution():
     bins = [(0, 20), (20, 40), (40, 60), (60, 80), (80, 100)]
     result = []
     for lo, hi in bins:
-        count = sum(1 for v in data if lo <= v["skor_prioritas"] < hi)
+        count = sum(1 for v in data if lo <= v["skor_ahp"] < hi)
         result.append({"range": f"{lo}-{hi}", "jumlah": count})
     return jsonify(result)
 
@@ -144,57 +144,81 @@ def get_idm_status():
 
 @api.route("/scoring/explain")
 def get_scoring_explain():
-    from processor.scoring import ScoringModel
-    model = ScoringModel()
+    from scoring.ahp import AHP
+    model = AHP()
     return jsonify(model.explain())
+
+
+@api.route("/scoring/calculate", methods=["POST"])
+def calculate_score():
+    body = request.get_json()
+    if not body or "weights" not in body:
+        return jsonify({"error": "weights required"}), 400
+
+    weights = body["weights"]
+    from scoring.ahp import AHP
+    ahp = AHP()
+    # override weights (untuk slider kalkulator interaktif)
+    if len(weights) == ahp.n:
+        ahp.weights = weights
+
+    data = _load_data()
+    scored = ahp.score(data)
+    return jsonify({
+        "data": scored,
+        "weights": ahp.weights,
+    })
 
 
 @api.route("/data/sources")
 def get_data_sources():
     return jsonify([
         {
-            "nama": "Indeks Desa Membangun (IDM) - Kemendesa",
+            "nama": "Indeks Desa Membangun (IDM) — Kemendesa",
             "deskripsi": "Data status perkembangan desa seluruh Indonesia (Mandiri, Maju, Berkembang, Tertinggal, Sangat Tertinggal)",
-            "sumber": "Kementerian Desa, Pembangunan Daerah Tertinggal, dan Transmigrasi",
+            "sumber": "Kementerian Desa, PDT, dan Transmigrasi",
             "url": "https://satudata.kemendesa.go.id",
             "tahun": "2023-2025",
             "real": True,
         },
         {
-            "nama": "IDM Aceh - Open Data Aceh",
-            "deskripsi": "Data IDM per kabupaten/kota di Provinsi Aceh (2018-2025)",
-            "sumber": "Dinas Pemberdayaan Masyarakat dan Gampong Aceh",
-            "url": "https://data.acehprov.go.id",
-            "tahun": "2018-2025",
+            "nama": "IPM & Kemiskinan — BPS",
+            "deskripsi": "Indeks Pembangunan Manusia dan persentase penduduk miskin per kabupaten (2024-2025)",
+            "sumber": "Badan Pusat Statistik (BPS)",
+            "url": "https://www.bps.go.id",
+            "tahun": "2024-2025",
             "real": True,
         },
         {
-            "nama": "ESDM One Map",
-            "deskripsi": "Peta potensi energi baru terbarukan (EBT) seluruh Indonesia",
-            "sumber": "Kementerian ESDM",
+            "nama": "Potensi EBT — ESDM One Map",
+            "deskripsi": "Data potensi energi surya, angin, air, dan biomassa per lokasi",
+            "sumber": "Kementerian ESDM — Direktorat Jenderal EBTKE",
             "url": "https://geoportal.esdm.go.id",
+            "tahun": "2024-2025",
+            "real": True,
+        },
+        {
+            "nama": "Biaya Pokok Produksi (BPP) Diesel — ESDM",
+            "deskripsi": "BPP listrik diesel per wilayah, dasar perhitungan efisiensi konversi ke EBT",
+            "sumber": "Kementerian ESDM — DJK",
+            "url": "https://www.esdm.go.id",
             "tahun": "2024",
             "real": True,
         },
         {
-            "nama": "PODES - BPS",
-            "deskripsi": "Pendataan Potensi Desa: infrastruktur, demografi, akses listrik per desa",
-            "sumber": "Badan Pusat Statistik (BPS)",
-            "url": "https://www.bps.go.id",
-            "tahun": "2024-2026",
+            "nama": "Rencana Usaha Penyediaan Tenaga Listrik (RUPTL) — PLN",
+            "deskripsi": "Data jaringan PLN eksisting dan rencana perluasan sampai 2034",
+            "sumber": "PT PLN (Persero)",
+            "url": "https://www.pln.co.id",
+            "tahun": "2024-2034",
             "real": True,
         },
         {
-            "nama": "CELIOS - Riset Elektrifikasi",
-            "deskripsi": "Riset akses listrik desa dan potensi EBT (data agregat nasional)",
-            "sumber": "CELIOS",
-            "url": "https://celios.co.id",
-            "tahun": "2025-2026",
-            "real": True,
+            "nama": "Data Simulasi Tim (Prototype)",
+            "deskripsi": "Dataset contoh 30 desa 3T lintas provinsi — disusun manual oleh tim dari kombinasi sumber resmi; untuk versi produksi diperlukan akses data granular resmi dari ESDM/BPS",
+            "sumber": "Tim Pengembang PETA-EBT",
+            "url": "",
+            "tahun": "2026",
+            "real": False,
         },
     ])
-
-
-@api.route("/health")
-def health():
-    return jsonify({"status": "ok", "app": "PETA-EBT API", "version": "1.0.0"})

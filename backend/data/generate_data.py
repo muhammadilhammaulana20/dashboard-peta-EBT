@@ -1,260 +1,220 @@
-import csv
 import json
-import math
 import random
 import os
-
-random.seed(42)
+import sys
 
 BASE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(BASE))  # untuk import scoring
 
-NAMA_KABUPATEN = {
-    "Aceh": ["Aceh Besar","Pidie","Aceh Utara","Aceh Timur","Aceh Tengah","Bener Meriah","Gayo Lues","Subulussalam","Simeulue","Aceh Singkil","Aceh Selatan","Aceh Tenggara","Aceh Barat","Aceh Barat Daya","Nagan Raya","Bireuen","Lhokseumawe","Langsa"],
-    "Sumatera Utara": ["Tapanuli Selatan","Tapanuli Tengah","Simalungun","Dairi","Karo","Pakpak Bharat","Humbang Hasundutan","Toba","Mandailing Natal","Padang Lawas","Labuhanbatu","Serdang Bedagai","Deliserdang","Langkat"],
-    "Sumatera Barat": ["Pesisir Selatan","Solok","Tanah Datar","Agam","Lima Puluh Kota","Pasaman","Kepulauan Mentawai","Dharmasraya","Sijunjung","Padang Pariaman"],
-    "Riau": ["Kampar","Indragiri Hulu","Indragiri Hilir","Pelalawan","Rokan Hulu","Rokan Hilir","Bengkalis","Meranti","Siak","Kuantan Singingi"],
-    "Jambi": ["Kerinci","Merangin","Sarolangun","Batanghari","Muaro Jambi","Tanjung Jabung Timur","Tanjung Jabung Barat","Tebo","Bungo"],
-    "Sumatera Selatan": ["Ogan Komering Ilir","Ogan Ilir","Muara Enim","Musi Banyuasin","Musi Rawas","Penukal Abab","Lahat","Empat Lawang","Pagar Alam","Prabumulih"],
-    "Bengkulu": ["Mukomuko","Bengkulu Utara","Lebong","Rejang Lebong","Kepahiang","Kaur","Seluma","Kota Bengkulu"],
-    "Lampung": ["Lampung Barat","Tanggamus","Pringsewu","Pesawaran","Lampung Selatan","Lampung Tengah","Lampung Timur","Lampung Utara","Way Kanan","Tulang Bawang","Mesuji"],
-    "Kep. Bangka Belitung": ["Bangka","Bangka Barat","Bangka Selatan","Bangka Tengah","Belitung","Belitung Timur"],
-    "Kepulauan Riau": ["Bintan","Karimun","Natuna","Lingga","Anambas","Tanjung Pinang"],
-    "DKI Jakarta": ["Kepulauan Seribu","Jakarta Pusat","Jakarta Utara","Jakarta Barat","Jakarta Selatan","Jakarta Timur"],
-    "Jawa Barat": ["Bogor","Sukabumi","Cianjur","Garut","Tasikmalaya","Ciamis","Kuningan","Majalengka","Sumedang","Indramayu","Subang","Purwakarta","Karawang","Bekasi","Bandung Barat","Pangandaran"],
-    "Jawa Tengah": ["Cilacap","Banyumas","Purbalingga","Banjarnegara","Kebumen","Purworejo","Wonosobo","Magelang","Boyolali","Klaten","Sukoharjo","Wonogiri","Karanganyar","Sragen","Grobogan","Blora","Rembang","Pati","Kudus","Jepara","Demak","Semarang","Temanggung","Kendal","Batang","Pekalongan","Pemalang","Tegal","Brebes"],
-    "DIY Yogyakarta": ["Kulon Progo","Bantul","Gunung Kidul","Sleman"],
-    "Jawa Timur": ["Pacitan","Ponorogo","Trenggalek","Tulungagung","Blitar","Kediri","Malang","Lumajang","Jember","Banyuwangi","Bondowoso","Situbondo","Probolinggo","Pasuruan","Sidoarjo","Mojokerto","Jombang","Nganjuk","Madiun","Magetan","Ngawi","Bojonegoro","Tuban","Lamongan","Gresik","Bangkalan","Sampang","Pamekasan","Sumenep"],
-    "Banten": ["Pandeglang","Lebak","Tangerang","Serang"],
-    "Bali": ["Jembrana","Tabanan","Badung","Gianyar","Klungkung","Bangli","Karangasem","Buleleng"],
-    "NTB": ["Lombok Barat","Lombok Tengah","Lombok Timur","Lombok Utara","Sumbawa","Dompu","Bima","Sumbawa Barat"],
-    "NTT": ["Kupang","Timor Tengah Selatan","Timor Tengah Utara","Belu","Alor","Lembata","Flores Timur","Sikka","Ende","Ngada","Nagekeo","Manggarai","Manggarai Barat","Manggarai Timur","Rote Ndao","Sabu Raijua","Sumba Barat","Sumba Timur","Malaka"],
-    "Kalimantan Barat": ["Sambas","Bengkayang","Landak","Pontianak","Sanggau","Ketapang","Sintang","Kapuas Hulu","Sekadau","Melawi","Kayong Utara","Kubu Raya"],
-    "Kalimantan Tengah": ["Katingan","Gunung Mas","Barito Selatan","Barito Utara","Sukamara","Lamandau","Seruyan","Kotawaringin Barat","Kotawaringin Timur","Kapuas","Pulang Pisau","Murung Raya"],
-    "Kalimantan Selatan": ["Tanah Laut","Kotabaru","Banjar","Barito Kuala","Tapin","Hulu Sungai Selatan","Hulu Sungai Tengah","Hulu Sungai Utara","Tabalong","Balangan"],
-    "Kalimantan Timur": ["Paser","Kutai Barat","Kutai Kartanegara","Kutai Timur","Berau","Penajam Paser Utara","Mahakam Ulu"],
-    "Kalimantan Utara": ["Malinau","Bulungan","Tana Tidung","Nunukan"],
-    "Sulawesi Utara": ["Bolaang Mongondow","Minahasa","Kepulauan Sangihe","Kepulauan Talaud","Minahasa Selatan","Minahasa Tenggara","Minahasa Utara","Bolaang Mongondow Utara"],
-    "Sulawesi Tengah": ["Banggai","Poso","Donggala","Toli-Toli","Buol","Parigi Moutong","Tojo Una-Una","Sigi","Banggai Laut","Morowali"],
-    "Sulawesi Selatan": ["Selayar","Bulukumba","Bantaeng","Jeneponto","Takalar","Gowa","Sinjai","Maros","Pangkajene","Barru","Bone","Soppeng","Wajo","Enrekang","Luwu","Tana Toraja","Pinrang","Palopo"],
-    "Sulawesi Tenggara": ["Konawe","Muna","Buton","Kolaka","Wakatobi","Bombana","Konawe Utara","Konawe Selatan","Buton Tengah","Muna Barat","Kolaka Timur"],
-    "Gorontalo": ["Boalemo","Pohuwato","Bone Bolango","Gorontalo","Gorontalo Utara"],
-    "Sulawesi Barat": ["Majene","Mamuju","Mamasa","Polewali Mandar","Mamuju Tengah","Pasangkayu"],
-    "Maluku": ["Maluku Tengah","Seram Bagian Timur","Seram Bagian Barat","Buru","Buru Selatan","Kepulauan Aru","Maluku Barat Daya","Maluku Tenggara","Tanimbar"],
-    "Maluku Utara": ["Halmahera Barat","Halmahera Timur","Halmahera Selatan","Halmahera Utara","Halmahera Tengah","Kepulauan Sula","Pulau Morotai","Pulau Taliabu"],
-    "Papua Barat": ["Manokwari","Pegunungan Arfak","Fakfak","Kaimana","Teluk Bintuni","Teluk Wondama","Sorong","Tambrauw"],
-    "Papua Barat Daya": ["Raja Ampat","Sorong Selatan","Maybrat","Teminabuan"],
-    "Papua": ["Jayapura","Keerom","Sarmi","Mamberamo Raya","Biak Numfor","Yapen","Waropen","Supiori","Mimika","Nabire","Paniai","Intan Jaya","Puncak Jaya","Deiyai","Dogiyai"],
-    "Papua Selatan": ["Merauke","Boven Digoel","Mappi","Asmat"],
-    "Papua Tengah": ["Nabire","Paniai","Mimika","Dogiyai","Deiyai","Puncak","Puncak Jaya","Intan Jaya"],
-    "Papua Pegunungan": ["Jayawijaya","Lanny Jaya","Nduga","Tolikara","Yahukimo","Yalimo","Pegunungan Bintang"],
-}
+# 30 desa sampel dari berbagai provinsi — representatif 3T
+SAMPEL_DESA = [
+    # NTT (desa 3T klasik)
+    {"desa": "Onggaya", "kecamatan": "Wolowaru", "kabupaten": "Ende", "provinsi": "NTT",
+     "kk_total": 420, "pct_belum": 0.68, "pct_diesel": 0.55, "pot_surya": 5.8, "pot_angin": 3.2, "pot_mikro": 1.5, "pot_biom": 0.8,
+     "bpp": 4200, "jarak_pln": 85, "idm_status": "Tertinggal", "ipm": 58.2, "kemiskinan": 28.5},
+    {"desa": "Watunggene", "kecamatan": "Kota Komba", "kabupaten": "Manggarai Timur", "provinsi": "NTT",
+     "kk_total": 310, "pct_belum": 0.72, "pct_diesel": 0.60, "pot_surya": 5.6, "pot_angin": 2.8, "pot_mikro": 3.2, "pot_biom": 1.2,
+     "bpp": 4400, "jarak_pln": 92, "idm_status": "Tertinggal", "ipm": 56.0, "kemiskinan": 31.2},
+    {"desa": "Haruru", "kecamatan": "Wae Rii", "kabupaten": "Manggarai", "provinsi": "NTT",
+     "kk_total": 275, "pct_belum": 0.75, "pct_diesel": 0.58, "pot_surya": 5.4, "pot_angin": 2.5, "pot_mikro": 4.0, "pot_biom": 1.0,
+     "bpp": 4300, "jarak_pln": 78, "idm_status": "Tertinggal", "ipm": 55.8, "kemiskinan": 32.0},
+    # Papua
+    {"desa": "Wamena Kota", "kecamatan": "Wamena", "kabupaten": "Jayawijaya", "provinsi": "Papua Pegunungan",
+     "kk_total": 680, "pct_belum": 0.82, "pct_diesel": 0.70, "pot_surya": 5.2, "pot_angin": 1.8, "pot_mikro": 2.5, "pot_biom": 1.5,
+     "bpp": 4800, "jarak_pln": 150, "idm_status": "Sangat Tertinggal", "ipm": 42.0, "kemiskinan": 42.5},
+    {"desa": "Timika Jaya", "kecamatan": "Mimika Baru", "kabupaten": "Mimika", "provinsi": "Papua Tengah",
+     "kk_total": 520, "pct_belum": 0.65, "pct_diesel": 0.55, "pot_surya": 5.0, "pot_angin": 2.0, "pot_mikro": 3.0, "pot_biom": 1.8,
+     "bpp": 4600, "jarak_pln": 120, "idm_status": "Tertinggal", "ipm": 45.3, "kemiskinan": 38.7},
+    {"desa": "Merauke Kota", "kecamatan": "Merauke", "kabupaten": "Merauke", "provinsi": "Papua Selatan",
+     "kk_total": 450, "pct_belum": 0.58, "pct_diesel": 0.45, "pot_surya": 5.5, "pot_angin": 2.2, "pot_mikro": 1.0, "pot_biom": 0.5,
+     "bpp": 4400, "jarak_pln": 95, "idm_status": "Berkembang", "ipm": 48.5, "kemiskinan": 35.0},
+    # Maluku
+    {"desa": "Passo", "kecamatan": "Teluk Ambon", "kabupaten": "Maluku Tengah", "provinsi": "Maluku",
+     "kk_total": 380, "pct_belum": 0.55, "pct_diesel": 0.48, "pot_surya": 5.3, "pot_angin": 3.8, "pot_mikro": 0.5, "pot_biom": 2.0,
+     "bpp": 4100, "jarak_pln": 65, "idm_status": "Berkembang", "ipm": 52.0, "kemiskinan": 30.2},
+    {"desa": "Bula", "kecamatan": "Bula", "kabupaten": "Seram Bagian Timur", "provinsi": "Maluku",
+     "kk_total": 290, "pct_belum": 0.62, "pct_diesel": 0.52, "pot_surya": 5.1, "pot_angin": 3.5, "pot_mikro": 1.8, "pot_biom": 1.0,
+     "bpp": 4200, "jarak_pln": 88, "idm_status": "Tertinggal", "ipm": 50.5, "kemiskinan": 33.5},
+    {"desa": "Wokam", "kecamatan": "Pulau-Pulau Aru", "kabupaten": "Kepulauan Aru", "provinsi": "Maluku",
+     "kk_total": 180, "pct_belum": 0.78, "pct_diesel": 0.65, "pot_surya": 5.7, "pot_angin": 4.2, "pot_mikro": 0, "pot_biom": 0.3,
+     "bpp": 4500, "jarak_pln": 130, "idm_status": "Sangat Tertinggal", "ipm": 47.0, "kemiskinan": 36.0},
+    # Aceh
+    {"desa": "Lhoknga", "kecamatan": "Lhoknga", "kabupaten": "Aceh Besar", "provinsi": "Aceh",
+     "kk_total": 350, "pct_belum": 0.25, "pct_diesel": 0.30, "pot_surya": 5.0, "pot_angin": 2.5, "pot_mikro": 1.0, "pot_biom": 0.5,
+     "bpp": 3200, "jarak_pln": 15, "idm_status": "Maju", "ipm": 65.0, "kemiskinan": 18.5},
+    {"desa": "Pante", "kecamatan": "Pante Bidari", "kabupaten": "Aceh Timur", "provinsi": "Aceh",
+     "kk_total": 280, "pct_belum": 0.35, "pct_diesel": 0.40, "pot_surya": 4.8, "pot_angin": 2.0, "pot_mikro": 2.5, "pot_biom": 1.0,
+     "bpp": 3400, "jarak_pln": 28, "idm_status": "Berkembang", "ipm": 62.0, "kemiskinan": 20.0},
+    {"desa": "Krueng Sabee", "kecamatan": "Krueng Sabee", "kabupaten": "Aceh Jaya", "provinsi": "Aceh",
+     "kk_total": 230, "pct_belum": 0.40, "pct_diesel": 0.35, "pot_surya": 4.9, "pot_angin": 2.8, "pot_mikro": 3.0, "pot_biom": 0.8,
+     "bpp": 3500, "jarak_pln": 35, "idm_status": "Berkembang", "ipm": 60.5, "kemiskinan": 22.0},
+    # Sumatera Utara
+    {"desa": "Sidorejo", "kecamatan": "Bandar Pasir Mandoge", "kabupaten": "Asahan", "provinsi": "Sumatera Utara",
+     "kk_total": 310, "pct_belum": 0.20, "pct_diesel": 0.25, "pot_surya": 4.5, "pot_angin": 1.5, "pot_mikro": 2.0, "pot_biom": 1.5,
+     "bpp": 2800, "jarak_pln": 18, "idm_status": "Maju", "ipm": 68.0, "kemiskinan": 15.0},
+    {"desa": "Sialang", "kecamatan": "Siais", "kabupaten": "Tapanuli Selatan", "provinsi": "Sumatera Utara",
+     "kk_total": 260, "pct_belum": 0.30, "pct_diesel": 0.35, "pot_surya": 4.3, "pot_angin": 1.2, "pot_mikro": 3.5, "pot_biom": 2.0,
+     "bpp": 3000, "jarak_pln": 22, "idm_status": "Berkembang", "ipm": 65.5, "kemiskinan": 17.5},
+    # Kalimantan Barat
+    {"desa": "Sintang", "kecamatan": "Sintang", "kabupaten": "Sintang", "provinsi": "Kalimantan Barat",
+     "kk_total": 340, "pct_belum": 0.32, "pct_diesel": 0.38, "pot_surya": 4.6, "pot_angin": 1.0, "pot_mikro": 4.5, "pot_biom": 3.0,
+     "bpp": 3300, "jarak_pln": 45, "idm_status": "Berkembang", "ipm": 61.0, "kemiskinan": 21.0},
+    {"desa": "Sambas", "kecamatan": "Sambas", "kabupaten": "Sambas", "provinsi": "Kalimantan Barat",
+     "kk_total": 300, "pct_belum": 0.22, "pct_diesel": 0.28, "pot_surya": 4.4, "pot_angin": 0.8, "pot_mikro": 2.0, "pot_biom": 2.5,
+     "bpp": 2900, "jarak_pln": 20, "idm_status": "Maju", "ipm": 64.0, "kemiskinan": 18.0},
+    # Sulawesi Tenggara
+    {"desa": "Wakatobi", "kecamatan": "Wangi-Wangi", "kabupaten": "Wakatobi", "provinsi": "Sulawesi Tenggara",
+     "kk_total": 250, "pct_belum": 0.45, "pct_diesel": 0.42, "pot_surya": 5.9, "pot_angin": 4.0, "pot_mikro": 0, "pot_biom": 0.5,
+     "bpp": 3800, "jarak_pln": 55, "idm_status": "Berkembang", "ipm": 58.0, "kemiskinan": 25.5},
+    {"desa": "Konawe", "kecamatan": "Konawe", "kabupaten": "Konawe", "provinsi": "Sulawesi Tenggara",
+     "kk_total": 320, "pct_belum": 0.28, "pct_diesel": 0.32, "pot_surya": 5.2, "pot_angin": 2.0, "pot_mikro": 2.8, "pot_biom": 1.5,
+     "bpp": 3100, "jarak_pln": 25, "idm_status": "Berkembang", "ipm": 62.5, "kemiskinan": 19.0},
+    # NTB
+    {"desa": "Sumbawa", "kecamatan": "Sumbawa", "kabupaten": "Sumbawa", "provinsi": "NTB",
+     "kk_total": 360, "pct_belum": 0.30, "pct_diesel": 0.33, "pot_surya": 6.2, "pot_angin": 3.0, "pot_mikro": 1.0, "pot_biom": 0.8,
+     "bpp": 3500, "jarak_pln": 30, "idm_status": "Berkembang", "ipm": 60.0, "kemiskinan": 23.5},
+    {"desa": "Lombok Utara", "kecamatan": "Bayan", "kabupaten": "Lombok Utara", "provinsi": "NTB",
+     "kk_total": 290, "pct_belum": 0.35, "pct_diesel": 0.38, "pot_surya": 6.0, "pot_angin": 2.5, "pot_mikro": 2.0, "pot_biom": 1.2,
+     "bpp": 3400, "jarak_pln": 32, "idm_status": "Berkembang", "ipm": 59.0, "kemiskinan": 24.5},
+    # Kalimantan Utara
+    {"desa": "Malinau", "kecamatan": "Malinau Kota", "kabupaten": "Malinau", "provinsi": "Kalimantan Utara",
+     "kk_total": 200, "pct_belum": 0.38, "pct_diesel": 0.40, "pot_surya": 4.7, "pot_angin": 1.5, "pot_mikro": 5.0, "pot_biom": 2.5,
+     "bpp": 3600, "jarak_pln": 48, "idm_status": "Berkembang", "ipm": 61.5, "kemiskinan": 20.0},
+    {"desa": "Nunukan", "kecamatan": "Nunukan", "kabupaten": "Nunukan", "provinsi": "Kalimantan Utara",
+     "kk_total": 180, "pct_belum": 0.42, "pct_diesel": 0.45, "pot_surya": 4.5, "pot_angin": 1.8, "pot_mikro": 4.0, "pot_biom": 2.0,
+     "bpp": 3700, "jarak_pln": 52, "idm_status": "Tertinggal", "ipm": 59.5, "kemiskinan": 22.5},
+    # Sulawesi Barat
+    {"desa": "Majene", "kecamatan": "Majene", "kabupaten": "Majene", "provinsi": "Sulawesi Barat",
+     "kk_total": 270, "pct_belum": 0.25, "pct_diesel": 0.30, "pot_surya": 5.1, "pot_angin": 2.2, "pot_mikro": 2.5, "pot_biom": 1.0,
+     "bpp": 3000, "jarak_pln": 18, "idm_status": "Maju", "ipm": 64.5, "kemiskinan": 17.0},
+    {"desa": "Mamasa", "kecamatan": "Mamasa", "kabupaten": "Mamasa", "provinsi": "Sulawesi Barat",
+     "kk_total": 230, "pct_belum": 0.33, "pct_diesel": 0.36, "pot_surya": 4.9, "pot_angin": 1.8, "pot_mikro": 3.5, "pot_biom": 1.8,
+     "bpp": 3200, "jarak_pln": 35, "idm_status": "Berkembang", "ipm": 61.0, "kemiskinan": 20.5},
+    # Gorontalo
+    {"desa": "Pohuwato", "kecamatan": "Pohuwato", "kabupaten": "Pohuwato", "provinsi": "Gorontalo",
+     "kk_total": 240, "pct_belum": 0.35, "pct_diesel": 0.38, "pot_surya": 5.5, "pot_angin": 2.0, "pot_mikro": 2.0, "pot_biom": 1.0,
+     "bpp": 3400, "jarak_pln": 28, "idm_status": "Berkembang", "ipm": 60.0, "kemiskinan": 22.0},
+    # Papua Barat
+    {"desa": "Manokwari", "kecamatan": "Manokwari Barat", "kabupaten": "Manokwari", "provinsi": "Papua Barat",
+     "kk_total": 380, "pct_belum": 0.55, "pct_diesel": 0.50, "pot_surya": 5.3, "pot_angin": 2.5, "pot_mikro": 2.0, "pot_biom": 1.5,
+     "bpp": 4300, "jarak_pln": 60, "idm_status": "Tertinggal", "ipm": 49.0, "kemiskinan": 34.0},
+    {"desa": "Sorong", "kecamatan": "Sorong Timur", "kabupaten": "Sorong", "provinsi": "Papua Barat Daya",
+     "kk_total": 340, "pct_belum": 0.50, "pct_diesel": 0.45, "pot_surya": 5.4, "pot_angin": 2.8, "pot_mikro": 1.5, "pot_biom": 1.0,
+     "bpp": 4200, "jarak_pln": 55, "idm_status": "Tertinggal", "ipm": 50.5, "kemiskinan": 32.0},
+    # Bengkulu
+    {"desa": "Mukomuko", "kecamatan": "Mukomuko", "kabupaten": "Mukomuko", "provinsi": "Bengkulu",
+     "kk_total": 260, "pct_belum": 0.28, "pct_diesel": 0.32, "pot_surya": 4.6, "pot_angin": 1.5, "pot_mikro": 3.0, "pot_biom": 1.8,
+     "bpp": 3000, "jarak_pln": 20, "idm_status": "Maju", "ipm": 63.0, "kemiskinan": 19.5},
+    # Maluku Utara
+    {"desa": "Ternate", "kecamatan": "Ternate Selatan", "kabupaten": "Ternate", "provinsi": "Maluku Utara",
+     "kk_total": 350, "pct_belum": 0.30, "pct_diesel": 0.35, "pot_surya": 5.2, "pot_angin": 3.0, "pot_mikro": 0.5, "pot_biom": 0.5,
+     "bpp": 3600, "jarak_pln": 25, "idm_status": "Berkembang", "ipm": 62.0, "kemiskinan": 21.0},
+]
 
-class DataGenerator:
-    def __init__(self):
-        self.idm_nasional = self._load_idm_nasional()
-        self.idm_aceh = self._load_idm_aceh()
-        self.villages = []
+TEKNOLOGI_LIST = ["PLTS + Battery", "PLTMH (Mikrohidro)", "PLTB (Angin)", "PLTBm (Biomassa)", "PLTS Hybrid"]
 
-    def _load_idm_nasional(self):
-        path = os.path.join(BASE, "idm_nasional.csv")
-        result = {}
-        if not os.path.exists(path):
-            return result
-        with open(path, encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                prov = row.get("PROVINSI", "").strip().title()
-                if prov:
-                    result[prov] = {
-                        "mandiri": int(row.get("MANDIRI", 0)),
-                        "maju": int(row.get("MAJU", 0)),
-                        "berkembang": int(row.get("BERKEMBANG", 0)),
-                        "tertinggal": int(row.get("TERTINGGAL", 0)),
-                        "sangat_tertinggal": int(row.get("SANGAT_TERTINGGAL", 0)),
-                        "total": int(row.get("TOTAL_DESA", 0)),
-                    }
-        return result
 
-    def _load_idm_aceh(self):
-        path = os.path.join(BASE, "idm_aceh.csv")
-        result = {}
-        if not os.path.exists(path):
-            return result
-        with open(path, encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f, delimiter=";")
-            for row in reader:
-                tahun = row.get("tahun", "")
-                if tahun != "2025":
-                    continue
-                kab = row.get("kemendagri_nama_kabupaten_kota", "").strip()
-                status = row.get("status_idm", "").strip()
-                jumlah = int(row.get("jumlah", 0))
-                if kab not in result:
-                    result[kab] = {}
-                result[kab][status] = jumlah
-        return result
+def _determine_idm_status(ipm, kemiskinan):
+    skor = (ipm + (100 - kemiskinan)) / 2
+    if skor >= 75:
+        return "Mandiri"
+    elif skor >= 65:
+        return "Maju"
+    elif skor >= 55:
+        return "Berkembang"
+    elif skor >= 45:
+        return "Tertinggal"
+    else:
+        return "Sangat Tertinggal"
 
-    def _determine_idm_status(self, skor):
-        if skor >= 80:
-            return "Mandiri"
-        elif skor >= 65:
-            return "Maju"
-        elif skor >= 50:
-            return "Berkembang"
-        elif skor >= 35:
-            return "Tertinggal"
+
+def _rekomendasi_teknologi(pot_surya, pot_angin, pot_mikro, pot_biom):
+    vals = [
+        (pot_surya, "PLTS + Battery"),
+        (pot_mikro, "PLTMH (Mikrohidro)"),
+        (pot_angin, "PLTB (Angin)"),
+        (pot_biom, "PLTBm (Biomassa)"),
+    ]
+    max_val = max(v[0] for v in vals)
+    candidates = [v[1] for v in vals if v[0] == max_val]
+    return candidates[0]
+
+
+def generate():
+    random.seed(42)
+    villages = []
+
+    for i, s in enumerate(SAMPEL_DESA):
+        kk_belum = int(s["kk_total"] * s["pct_belum"])
+        kk_diesel = int(s["kk_total"] * s["pct_diesel"])
+        idm_status = _determine_idm_status(s["ipm"], s["kemiskinan"])
+        rekom = _rekomendasi_teknologi(s["pot_surya"], s["pot_angin"], s["pot_mikro"], s["pot_biom"])
+
+        biaya_per_kk = random.randint(8, 25) * 100000
+        penghematan = round(s["bpp"] * kk_diesel * 365 * random.uniform(0.3, 0.6) * 5 / 1000) * 1000
+        estimasi_biaya = kk_belum * biaya_per_kk
+        potensi_total = round(s["pot_surya"] + s["pot_angin"] + s["pot_mikro"] + s["pot_biom"], 2)
+
+        if s["jarak_pln"] > 60:
+            akses = "Sulit"
+        elif s["jarak_pln"] > 25:
+            akses = "Sedang"
         else:
-            return "Sangat Tertinggal"
+            akses = "Mudah"
 
-    def generate(self):
-        nama_desa_pool = [
-            "Sukamaju","Sukajaya","Mekarsari","Cibeureum","Cipanas","Cisarua",
-            "Wanasari","Kertajaya","Margamulya","Sindangsari","Batuah","Pujud",
-            "Rambah","Tambusai","Kepenuhan","Bonai","Kumun","Muara",
-            "Sialang","Tandun","Kuntodadi","Srimulyo","Sidorejo","Sumberejo",
-            "Bulurejo","Banjarsari","Tegalrejo","Karangrejo","Sumberagung",
-            "Margorejo","Banyuurip","Pringapus","Tlogosari","Gunungsari",
-            "Kalirejo","Kedungrejo","Jatisari","Kutorejo","Ngemplak",
-            "Wonorejo","Sidomulyo","Sukoharjo","Tawangsari","Mojosari",
-            "Onggaya","Watunggene","Haruru","Waeperang","Ritapirik",
-            "Talibura","Wolomage","Lamanabi","Batu Merah","Fatu Bau",
-            "Hilibadalu","Orahili","Sifalago","Lahusa","Hiligeo",
-            "Simandraulo","Wamena Kota","Wesaput","Napua","Hubikosi",
-            "Bubulan","Mulia","Ilambetawi","Wurabunga","Kiburu",
-            "Yuguru","Timika Jaya","Wania","Mapurujaya","Kuala Kencana",
-            "Passo","Laha","Tulehu","Tial","Waai","Namar","Gemba",
-            "Bula","Sawai","Werwaru","Wokam","Kobror","Kota Lama",
-            "Tepa","Lingat","Pongkalahero","Tobimeita","Onemay",
-            "Siwing","Pangan Jaya","Lamanggau","Lamahala","Kota Baku",
-            "Lamtutui","Keude","Saree","Kayee","Lampanah","Beureunuen",
-            "Mns Mesjid","Pante","Krueng","Panton","Rembele","Pegasing",
-            "Silih Nara","Bebesan","Kutacane","Babussalam","Lawe Sumur",
-            "Mameh","Bunbun","Alur","Seukee","Pasi","Rawa","Simpang",
-            "Krueng Sabee","Calang","Lama","Batee","Neuheun","Seulimum",
-            "Lambaro","Jantho","Geuceu","Lamteh","Ulee Lheue",
-            "Deah Glumpang","Peukan Bada","Lamglumpang","Lamjamee",
-            "Lampulo","Lhoknga","Leupung","Pulo Aceh","Lubok",
-            "Pasi Janeng","Cot Girek","Tanah Luas","Birem",
-            "Seuneubok","Matang","Simpang Ulim","Rantau Selamat",
-        ]
+        # Cari potensi dominan untuk ditampilkan
+        pot_maks = max(s["pot_surya"], s["pot_mikro"], s["pot_angin"], s["pot_biom"])
+        if pot_maks == s["pot_surya"]:
+            pot_dominan = "PLTS + Battery"
+        elif pot_maks == s["pot_mikro"]:
+            pot_dominan = "PLTMH (Mikrohidro)"
+        elif pot_maks == s["pot_angin"]:
+            pot_dominan = "PLTB (Angin)"
+        else:
+            pot_dominan = "PLTBm (Biomassa)"
 
-        id_counter = 0
-        tekonologi_list = ["PLTS + Battery", "PLTMH (Mikrohidro)", "PLTB (Angin)", "PLTBm (Biomassa)", "PLTS Hybrid"]
+        villages.append({
+            "id": i + 1,
+            "desa": s["desa"],
+            "kecamatan": s["kecamatan"],
+            "kabupaten": s["kabupaten"],
+            "provinsi": s["provinsi"],
+            "kk_total": s["kk_total"],
+            "kk_belum_listrik": kk_belum,
+            "kk_diesel": kk_diesel,
+            "kk_terdampak": kk_belum + kk_diesel,
+            "ipm": s["ipm"],
+            "kemiskinan": s["kemiskinan"],
+            "potensi_ebt": potensi_total,
+            "pot_surya": s["pot_surya"],
+            "pot_mikrohidro": s["pot_mikro"],
+            "pot_angin": s["pot_angin"],
+            "pot_biomassa": s["pot_biom"],
+            "potensi_dominan": pot_dominan,
+            "bpp_diesel": s["bpp"],
+            "jarak_pln": s["jarak_pln"],
+            "biaya_per_kk": biaya_per_kk,
+            "aksesibilitas": akses,
+            "idm_status": idm_status,
+            "rekomendasi_teknologi": rekom,
+            "estimasi_penghematan_tahunan": penghematan,
+            "estimasi_biaya_proyek": estimasi_biaya,
+        })
 
-        for provinsi, kab_list in NAMA_KABUPATEN.items():
-            idm_info = self.idm_nasional.get(provinsi, {})
-            total_desa = idm_info.get("total", random.randint(50, 800))
+    # Hitung AHP score
+    from scoring.ahp import AHP
+    ahp = AHP()
+    villages = ahp.score(villages)
 
-            n_desa = min(total_desa, random.randint(5, 25))
-            if provinsi in ["Papua Pegunungan", "Papua Tengah", "Papua Selatan", "Papua", "NTT", "Maluku"]:
-                n_desa = max(n_desa, random.randint(15, 30))
-            elif provinsi in ["DKI Jakarta", "Bali", "DIY Yogyakarta"]:
-                n_desa = min(n_desa, random.randint(3, 10))
+    # Hapus field sementara yg dipakai internal
+    for v in villages:
+        v.pop("nilai_normalisasi", None)
 
-            for _ in range(n_desa):
-                id_counter += 1
-                kab = random.choice(kab_list)
-                desa = random.choice(nama_desa_pool)
-
-                kk_total = random.randint(150, 2500)
-                pct_belum_listrik = random.uniform(0.05, 0.8)
-                pct_diesel = random.uniform(0.05, 0.7)
-                faktor_timur = 1.0
-                if provinsi in ["Papua", "Papua Pegunungan", "Papua Tengah", "Papua Selatan",
-                                 "Papua Barat", "Papua Barat Daya", "Maluku", "Maluku Utara", "NTT"]:
-                    faktor_timur = random.uniform(1.3, 2.0)
-                pct_belum_listrik = min(pct_belum_listrik * faktor_timur, 0.95)
-                pct_diesel = min(pct_diesel * faktor_timur, 0.85)
-
-                kk_belum = int(kk_total * pct_belum_listrik)
-                kk_diesel = int(kk_total * pct_diesel)
-
-                pot_surya = random.uniform(3.5, 6.8)
-                pot_mikro = random.uniform(0, 3.5) if provinsi not in ["DKI Jakarta"] else random.uniform(0, 0.5)
-                pot_angin = random.uniform(0, 4.5)
-                pot_biom = random.uniform(0, 3.0)
-
-                potensi_total = round(pot_surya + pot_mikro + pot_angin + pot_biom, 2)
-
-                maks_val = max(pot_surya, pot_mikro, pot_angin, pot_biom)
-                if maks_val == pot_surya:
-                    potensi_dominan = "PLTS + Battery"
-                elif maks_val == pot_mikro:
-                    potensi_dominan = "PLTMH (Mikrohidro)"
-                elif maks_val == pot_angin:
-                    potensi_dominan = "PLTB (Angin)"
-                else:
-                    potensi_dominan = "PLTBm (Biomassa)"
-
-                bpp_diesel = random.randint(2200, 4800)
-                if provinsi in ["Papua", "Papua Pegunungan", "Papua Tengah", "Papua Selatan",
-                                 "Papua Barat", "Papua Barat Daya", "Maluku", "NTT"]:
-                    bpp_diesel = random.randint(3800, 5000)
-
-                jarak_pln = round(random.uniform(3, 150), 1)
-                if jarak_pln > 60:
-                    akses = "Sulit"
-                elif jarak_pln > 25:
-                    akses = "Sedang"
-                else:
-                    akses = "Mudah"
-
-                n_kk = kk_belum + kk_diesel
-                skor = round(
-                    min(potensi_total / 8, 1) * 30 +
-                    min(n_kk / 2000, 1) * 25 +
-                    min(bpp_diesel / 5000, 1) * 20 +
-                    min(jarak_pln / 150, 1) * 15 +
-                    (10 if akses == "Sulit" else 6 if akses == "Sedang" else 2)
-                , 1)
-
-                idm_status = self._determine_idm_status(skor)
-
-                penghematan = round(bpp_diesel * kk_diesel * 365 * random.uniform(0.3, 0.6) * 5 / 1000) * 1000
-                estimasi_biaya = random.randint(500, 3500) * 1000000
-
-                if random.random() < 0.15:
-                    rekom = random.choice(tekonologi_list)
-                else:
-                    rekom = potensi_dominan
-
-                self.villages.append({
-                    "id": id_counter,
-                    "desa": desa,
-                    "kecamatan": f"Kecamatan {desa[:5]}",
-                    "kabupaten": kab,
-                    "provinsi": provinsi,
-                    "kk_total": kk_total,
-                    "kk_belum_listrik": kk_belum,
-                    "kk_diesel": kk_diesel,
-                    "kk_terdampak": n_kk,
-                    "potensi_ebt_mw": potensi_total,
-                    "potensi_dominan": potensi_dominan,
-                    "pot_surya": round(pot_surya, 2),
-                    "pot_mikrohidro": round(pot_mikro, 2),
-                    "pot_angin": round(pot_angin, 2),
-                    "pot_biomassa": round(pot_biom, 2),
-                    "bpp_diesel": bpp_diesel,
-                    "jarak_pln_km": jarak_pln,
-                    "aksesibilitas": akses,
-                    "skor_prioritas": skor,
-                    "idm_status": idm_status,
-                    "estimasi_penghematan_tahunan": penghematan,
-                    "estimasi_biaya_proyek": estimasi_biaya,
-                    "rekomendasi_teknologi": rekom,
-                    "sumber_data_idm": "Kemendesa (IDM Nasional)" if provinsi in self.idm_nasional else "Estimasi berbasis pola IDM"
-                })
-
-        self.villages.sort(key=lambda v: v["skor_prioritas"], reverse=True)
-        for i, v in enumerate(self.villages):
-            v["ranking"] = i + 1
-
-        return self.villages
-
-if __name__ == "__main__":
-    gen = DataGenerator()
-    data = gen.generate()
     out_path = os.path.join(BASE, "villages.json")
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    print(f"Generated {len(data)} villages, saved to {out_path}")
+        json.dump(villages, f, ensure_ascii=False, indent=2)
+    print(f"Generated {len(villages)} villages with AHP scores. Saved to {out_path}")
+
+
+if __name__ == "__main__":
+    generate()
