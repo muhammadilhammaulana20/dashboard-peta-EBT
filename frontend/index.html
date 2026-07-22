@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PETA-EBT — Dashboard Prioritas Dedieselisasi Desa 3T</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{energy:{DEFAULT:'#0891b2',50:'#ecfeff',100:'#cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',500:'#06b6d4',600:'#0891b2'},green:{DEFAULT:'#10b981',50:'#ecfdf5'},earth:{DEFAULT:'#d97706',50:'#fffbeb'}}},fontFamily:{sans:['Inter','system-ui','sans-serif'],display:['Plus Jakarta Sans','Inter','system-ui','sans-serif']}}}</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(255,255,255,.9);">
+    <div class="text-center">
+      <div class="w-12 h-12 border-4 border-energy-200 border-t-energy-600 rounded-full animate-spin mx-auto mb-4"></div>
+      <div class="text-sm font-medium text-slate-500">Memuat data dashboard...</div>
+    </div>
+  </div>
+
+  <!-- Error overlay -->
+  <div id="loadError" class="hidden fixed inset-0 z-[100] flex items-center justify-center" style="background:rgba(255,255,255,.95);">
+    <div class="text-center max-w-md p-8">
+      <i class="fa-solid fa-circle-exclamation text-4xl text-red-400 mb-4"></i>
+      <h3 class="text-lg font-bold text-slate-800 mb-2">Gagal Memuat Dashboard</h3>
+      <p class="text-sm text-slate-500 mb-4" id="loadErrorMsg"></p>
+      <p class="text-xs text-slate-400">Pastikan server backend sudah berjalan.<br/>Jalankan <code class="bg-slate-100 px-2 py-0.5 rounded text-xs font-mono">run.bat</code> atau <code class="bg-slate-100 px-2 py-0.5 rounded text-xs font-mono">python backend/app.py</code></p>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="fixed top-0 left-0 right-0 z-50" style="background:rgba(15,23,42,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="#" class="flex items-center gap-3 no-underline">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0891b2,#10b981);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:1.1rem;">P</div>
+          <div>
+            <span class="font-bold text-white text-lg" style="font-family:'Plus Jakarta Sans',sans-serif;">PETA<span style="color:#22d3ee;">-EBT</span></span>
+            <span class="hidden sm:inline text-xs text-slate-400 ml-2 font-medium">Dashboard Dedieselisasi</span>
+          </div>
+        </a>
+        <div class="nav-links flex items-center gap-1" id="navLinks">
+          <a href="#beranda" class="nav-link active">Beranda</a>
+          <a href="#data" class="nav-link">Data Prioritas</a>
+          <a href="#analisis" class="nav-link">Analisis</a>
+          <a href="#rekomendasi" class="nav-link">Rekomendasi</a>
+          <a href="#sumber" class="nav-link">Sumber Data</a>
+        </div>
+        <button id="hamburger" class="md:hidden text-white p-2">
+          <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="beranda" class="hero-gradient relative pt-24 pb-12 sm:pt-32 sm:pb-20 overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden opacity-[0.03]">
+      <div style="position:absolute;top:-30%;right:-10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,#0891b2 0%,transparent 70%);"></div>
+      <div style="position:absolute;bottom:-20%;left:-10%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,#10b981 0%,transparent 70%);"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <div class="anim-fade">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6" style="background:rgba(8,145,178,.15);color:#67e8f9;border:1px solid rgba(8,145,178,.3);">
+            <i class="fa-solid fa-bolt"></i> Sistem Pendukung Keputusan — Dedieselisasi
+          </div>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] mb-6" style="font-family:'Plus Jakarta Sans',sans-serif;">
+            Prioritas Elektrifikasi<br/>
+            <span style="background:linear-gradient(135deg,#22d3ee,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Berbasis Data & Potensi Lokal</span>
+          </h1>
+          <p class="text-slate-300 text-lg sm:text-xl leading-relaxed max-w-xl mb-8">
+            Dashboard skoring multi-kriteria untuk menentukan desa prioritas dedieselisasi berdasarkan potensi energi terbarukan lokal, biaya diesel, jumlah penduduk terdampak, dan aksesibilitas geografis.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a href="#data" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-105 no-underline" style="background:#0891b2;color:#fff;">
+              <i class="fa-solid fa-table"></i> Lihat Data Prioritas
+            </a>
+            <a href="#analisis" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-105 no-underline" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.15);">
+              <i class="fa-solid fa-chart-simple"></i> Analisis Detail
+            </a>
+          </div>
+        </div>
+        <div class="hidden lg:block anim-fade">
+          <div class="card p-8">
+            <div class="flex items-center gap-2 mb-4">
+              <div style="width:12px;height:12px;border-radius:50%;background:#10b981;"></div>
+              <span class="text-sm font-semibold text-slate-700">Ringkasan Data</span>
+              <span class="text-xs text-slate-400 ml-auto">Sumber: Kemendesa, ESDM, BPS</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div><div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Desa Terdata</div><div class="text-3xl font-extrabold text-slate-800" id="statTotalDesa">0</div></div>
+              <div><div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Provinsi</div><div class="text-3xl font-extrabold text-slate-800" id="statTotalProvinsi">0</div></div>
+              <div><div class="text-xs text-slate-500 font-medium uppercase tracking-wide">KK Terdampak</div><div class="text-3xl font-extrabold text-slate-800" id="statTotalKK">0</div></div>
+              <div><div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Potensi EBT (MW)</div><div class="text-3xl font-extrabold text-energy-600" id="statTotalPotensi">0</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY STATS -->
+  <section class="relative -mt-8 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-5 flex items-center gap-4">
+          <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#dbeafe,#eff6ff);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-sack-dollar text-energy-600 text-xl"></i></div>
+          <div><div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Penghematan/Tahun</div><div class="stat-number text-slate-800" id="statTotalHemat">Rp0</div></div>
+        </div>
+        <div class="card p-5 flex items-center gap-4">
+          <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#d1fae5,#ecfdf5);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-star text-green-600 text-xl"></i></div>
+          <div><div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Rata-rata Skor</div><div class="stat-number text-slate-800" id="statRataSkor">0</div></div>
+        </div>
+        <div class="card p-5 flex items-center gap-4">
+          <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#fef3c7,#fffbeb);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-coins text-earth-600 text-xl"></i></div>
+          <div><div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Estimasi Biaya Proyek</div><div class="stat-number text-slate-800" id="statTotalBiaya">Rp0</div></div>
+        </div>
+        <div class="card p-5 flex items-center gap-4">
+          <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#fce7f3,#fdf2f8);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-building-columns text-pink-600 text-xl"></i></div>
+          <div><div class="text-xs text-slate-500 font-medium uppercase tracking-wide">Sumber Data Real</div><div class="stat-number text-slate-800" style="font-size:1.5rem;">Kemendesa, Aceh, ESDM, BPS</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA PRIORITAS -->
+  <section id="data" class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-energy-50 text-energy-700 border border-energy-200 mb-4 w-fit">
+        <i class="fa-solid fa-ranking-star"></i> DATA PRIORITAS
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-2" style="font-family:'Plus Jakarta Sans',sans-serif;">Peringkat Prioritas Desa</h2>
+      <p class="text-slate-500 max-w-2xl mb-8">Hasil skoring multi-kriteria berdasarkan data real IDM Kemendesa, potensi EBT, BPP diesel, dan aksesibilitas. Data diperbarui secara dinamis dari server backend.</p>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap gap-2 mb-4" id="filterButtons"></div>
+
+      <!-- Search + Export -->
+      <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mb-4">
+        <div class="relative flex-1 max-w-md">
+          <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <input type="text" id="searchInput" placeholder="Cari desa, kecamatan, kabupaten..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-energy-400/30 focus:border-energy-400 transition" />
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="exportCSV" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition hover:scale-105 no-underline" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;cursor:pointer;">
+            <i class="fa-solid fa-download"></i> Download CSV
+          </button>
+          <span class="text-sm text-slate-500" id="tableCounter">0 desa</span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card overflow-hidden">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:48px;">#</th>
+                <th>Desa</th>
+                <th>Kecamatan</th>
+                <th>Kabupaten</th>
+                <th>Provinsi</th>
+                <th>KK Terdampak</th>
+                <th>Potensi Dominan</th>
+                <th>BPP (Rp/kWh)</th>
+                <th>Jarak PLN</th>
+                <th>Akses</th>
+                <th>IDM Status</th>
+                <th>Skor</th>
+                <th>Rekomendasi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr><td colspan="13" class="text-center py-10 text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i><br/>Memuat data...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALISIS CHARTS -->
+  <section id="analisis" class="py-12" style="background:#f8fafc;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-energy-50 text-energy-700 border border-energy-200 mb-4 w-fit">
+        <i class="fa-solid fa-chart-pie"></i> ANALISIS & VISUALISASI
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-2" style="font-family:'Plus Jakarta Sans',sans-serif;">Analisis Multi-Dimensi</h2>
+      <p class="text-slate-500 max-w-2xl mb-8">Visualisasi interaktif potensi EBT, distribusi teknologi, skor prioritas, dan status IDM dari seluruh desa terdampak.</p>
+
+      <div class="grid lg:grid-cols-2 gap-6 mb-6">
+        <div class="card p-6"><h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fa-solid fa-trophy text-earth-500"></i> 10 Desa Prioritas Tertinggi</h3><p class="text-xs text-slate-400 mb-4">Berdasarkan skor gabungan MCDA</p><div style="height:300px;"><canvas id="top10Chart"></canvas></div></div>
+        <div class="card p-6"><h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fa-solid fa-microchip text-energy-500"></i> Rekomendasi Teknologi EBT</h3><p class="text-xs text-slate-400 mb-4">Distribusi per desa</p><div style="height:300px;"><canvas id="techChart"></canvas></div></div>
+        <div class="card p-6"><h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fa-solid fa-chart-column text-green-500"></i> Potensi EBT per Provinsi</h3><p class="text-xs text-slate-400 mb-4">Total MW per provinsi</p><div style="height:300px;"><canvas id="provinceChart"></canvas></div></div>
+        <div class="card p-6"><h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fa-solid fa-gauge-high text-purple-500"></i> Distribusi Skor Prioritas</h3><p class="text-xs text-slate-400 mb-4">Sebaran skor antar desa</p><div style="height:300px;"><canvas id="distribusiChart"></canvas></div></div>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-energy-500"></i> Peta Prioritas per Provinsi</h3>
+        <p class="text-xs text-slate-400 mb-4">Rata-rata skor prioritas & jumlah desa terdampak per provinsi</p>
+        <div class="map-grid" id="provinceMap"></div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mt-6">
+        <div class="card p-6">
+          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-layer-group text-green-500"></i> Status IDM (Indeks Desa Membangun)</h3>
+          <p class="text-xs text-slate-400 mb-4">Distribusi status desa berdasarkan data real Kemendesa</p>
+          <div id="idmChartContainer"></div>
+        </div>
+        <div class="card p-6">
+          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-energy-500"></i> Metodologi Skoring MCDA</h3>
+          <p class="text-xs text-slate-400 mb-4">Multi-Criteria Decision Analysis — Weighted Sum Model</p>
+          <div id="scoringMethod"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REKOMENDASI -->
+  <section id="rekomendasi" class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200 mb-4 w-fit">
+        <i class="fa-solid fa-lightbulb"></i> REKOMENDASI STRATEGIS
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-2" style="font-family:'Plus Jakarta Sans',sans-serif;">Rekomendasi Kebijakan</h2>
+      <p class="text-slate-500 max-w-2xl mb-8">Berdasarkan hasil analisis data dan model skoring PETA-EBT untuk mempercepat program dedieselisasi Desa 3T.</p>
+
+      <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="card p-6 border-t-4" style="border-top-color:#0891b2;">
+          <div style="width:48px;height:48px;border-radius:12px;background:#ecfeff;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;"><i class="fa-solid fa-gauge-high text-energy-600 text-lg"></i></div>
+          <h3 class="font-bold text-slate-800 mb-2">Prioritaskan BPP Tinggi</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">Desa dengan BPP diesel di atas Rp3.800/kWh (Papua, Maluku, NTT) harus jadi prioritas utama konversi ke EBT. Penghematan operasional tahunan mencapai puluhan miliar rupiah.</p>
+        </div>
+        <div class="card p-6 border-t-4" style="border-top-color:#10b981;">
+          <div style="width:48px;height:48px;border-radius:12px;background:#ecfdf5;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;"><i class="fa-solid fa-solar-panel text-green-600 text-lg"></i></div>
+          <h3 class="font-bold text-slate-800 mb-2">Optimalkan Potensi Lokal</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">Prioritaskan PLTS + Battery untuk mayoritas desa 3T. Untuk desa dengan aliran sungai stabil, mikrohidro lebih ekonomis jangka panjang. Sesuaikan dengan potensi dominan tiap desa.</p>
+        </div>
+        <div class="card p-6 border-t-4" style="border-top-color:#f59e0b;">
+          <div style="width:48px;height:48px;border-radius:12px;background:#fffbeb;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;"><i class="fa-solid fa-scale-balanced text-earth-600 text-lg"></i></div>
+          <h3 class="font-bold text-slate-800 mb-2">Integrasi ke ESDM One Map</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">Output PETA-EBT sebaiknya terintegrasi sebagai modul pertimbangan dalam ESDM One Map yang sudah ada, bukan platform baru terpisah, untuk kemudahan adopsi pemerintah.</p>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="font-bold text-slate-800 text-lg mb-3">Tahapan Implementasi</h3>
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="text-center p-4 rounded-xl" style="background:#f1f5f9;">
+            <div class="w-10 h-10 rounded-full bg-energy-600 text-white flex items-center justify-center mx-auto mb-2 font-bold text-sm">1</div>
+            <div class="font-semibold text-sm text-slate-700">Piloting NTT</div>
+            <div class="text-xs text-slate-500 mt-1">Uji coba model di provinsi dengan data paling lengkap</div>
+          </div>
+          <div class="text-center p-4 rounded-xl" style="background:#f1f5f9;">
+            <div class="w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center mx-auto mb-2 font-bold text-sm">2</div>
+            <div class="font-semibold text-sm text-slate-700">Validasi Lapangan</div>
+            <div class="text-xs text-slate-500 mt-1">Verifikasi skor dengan kondisi riil di 30 desa prioritas</div>
+          </div>
+          <div class="text-center p-4 rounded-xl" style="background:#f1f5f9;">
+            <div class="w-10 h-10 rounded-full bg-earth-600 text-white flex items-center justify-center mx-auto mb-2 font-bold text-sm">3</div>
+            <div class="font-semibold text-sm text-slate-700">Skalasi Nasional</div>
+            <div class="text-xs text-slate-500 mt-1">Terapkan ke seluruh 34 provinsi dengan data aktual</div>
+          </div>
+          <div class="text-center p-4 rounded-xl" style="background:#f1f5f9;">
+            <div class="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center mx-auto mb-2 font-bold text-sm">4</div>
+            <div class="font-semibold text-sm text-slate-700">Machine Learning</div>
+            <div class="text-xs text-slate-500 mt-1">Kembangkan predictive scoring dari data historis proyek</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUMBER DATA -->
+  <section id="sumber" class="py-12" style="background:#f8fafc;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 mb-4 w-fit">
+        <i class="fa-solid fa-database"></i> SUMBER DATA
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-2" style="font-family:'Plus Jakarta Sans',sans-serif;">Data & Referensi</h2>
+      <p class="text-slate-500 max-w-2xl mb-8">Dashboard ini menggunakan data dari sumber pemerintah yang terbuka dan dapat diverifikasi.</p>
+
+      <div class="grid md:grid-cols-2 gap-4" id="dataSources"></div>
+
+      <div class="mt-8 card p-6">
+        <h3 class="font-bold text-slate-800 mb-3">Cara Mengakses Data Real</h3>
+        <div class="grid md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <div class="font-medium text-slate-700 mb-1"><i class="fa-solid fa-globe text-energy-500 mr-1"></i> ESDM One Map</div>
+            <a href="https://geoportal.esdm.go.id" target="_blank" class="text-energy-600 hover:underline text-xs">geoportal.esdm.go.id</a>
+            <p class="text-xs text-slate-400 mt-1">Peta potensi EBT, jaringan PLN, dan sumber daya energi</p>
+          </div>
+          <div>
+            <div class="font-medium text-slate-700 mb-1"><i class="fa-solid fa-building-columns text-green-500 mr-1"></i> Portal Satu Data</div>
+            <a href="https://data.go.id" target="_blank" class="text-energy-600 hover:underline text-xs">data.go.id</a>
+            <p class="text-xs text-slate-400 mt-1">10.000+ dataset dari seluruh instansi pemerintah</p>
+          </div>
+          <div>
+            <div class="font-medium text-slate-700 mb-1"><i class="fa-solid fa-chart-bar text-purple-500 mr-1"></i> BPS - PODES</div>
+            <a href="https://www.bps.go.id" target="_blank" class="text-energy-600 hover:underline text-xs">bps.go.id</a>
+            <p class="text-xs text-slate-400 mt-1">Pendataan Potensi Desa (sensus desa nasional)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background:#0f172a;" class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="flex items-center gap-2">
+          <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#0891b2,#10b981);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:.8rem;">P</div>
+          <span class="font-bold text-white text-sm">PETA<span style="color:#22d3ee;">-EBT</span></span>
+        </div>
+        <p class="text-xs text-slate-500 text-center">© 2026 — Dashboard Prioritas Dedieselisasi Desa 3T<br/>Dikembangkan untuk Lomba Essay 3T</p>
+        <div class="text-xs text-slate-500">
+          <i class="fa-solid fa-database mr-1"></i> Data: Kemendesa, ESDM, BPS, CELIOS
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
