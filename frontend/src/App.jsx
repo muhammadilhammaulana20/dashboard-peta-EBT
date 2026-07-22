@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { fetchSummary, fetchVillages, fetchProvinceStats, fetchTechnologyStats, fetchScoreDistribution, fetchIdmStatus, fetchScoringExplain, fetchDataSources } from './api'
 import Navbar from './components/Navbar'
 import HeroSection from './components/HeroSection'
-import SummaryCards from './components/SummaryCards'
 import RankingTable from './components/RankingTable'
 import MethodologySection from './components/MethodologySection'
 import ChartsSection from './components/ChartsSection'
@@ -25,16 +24,8 @@ export default function App() {
     ])
     .then(([summary, villagesResp, provStats, techStats, scoreDist, idmStatus, scoringExplain, dataSources]) => {
       setData({
-        loading: false,
-        error: null,
-        summary,
-        villages: villagesResp.data || [],
-        provStats,
-        techStats,
-        scoreDist,
-        idmStatus,
-        scoringExplain,
-        dataSources,
+        loading: false, error: null,
+        summary, villages: villagesResp.data || [], provStats, techStats, scoreDist, idmStatus, scoringExplain, dataSources,
       })
     })
     .catch(err => setData({ loading: false, error: err.message }))
@@ -42,10 +33,10 @@ export default function App() {
 
   if (data.loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-navy-900">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0f1a' }}>
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-navy-200 text-sm">Memuat dashboard...</p>
+          <p className="text-navy-300 text-sm">Memuat dashboard...</p>
         </div>
       </div>
     )
@@ -53,25 +44,35 @@ export default function App() {
 
   if (data.error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-navy-900">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0f1a' }}>
         <div className="text-center max-w-md p-8">
           <p className="text-red-400 text-lg font-semibold mb-2">Gagal Memuat Dashboard</p>
-          <p className="text-navy-200 text-sm mb-4">{data.error}</p>
-          <p className="text-navy-400 text-xs">Pastikan server backend berjalan</p>
+          <p className="text-navy-300 text-sm mb-4">{data.error}</p>
+          <p className="text-navy-500 text-xs">Pastikan server backend berjalan</p>
         </div>
       </div>
     )
   }
 
+  const metodologiRef = (el) => {
+    if (el) window._metodologiEl = el
+  }
+
   return (
-    <div className="min-h-screen bg-navy-50">
+    <div className="min-h-screen w-full" style={{ background: '#0d1421' }}>
       <Navbar page={page} onPageChange={setPage} />
 
       {page === 'beranda' && (
         <>
           <HeroSection villages={data.villages} />
-          <SummaryCards summary={data.summary} />
           <RankingTable villages={data.villages} provStats={data.provStats} />
+          <div ref={metodologiRef} id="metodologi">
+            <MethodologySection
+              explain={data.scoringExplain}
+              embedded={true}
+              villages={data.villages}
+            />
+          </div>
           <ChartsSection
             villages={data.villages}
             provStats={data.provStats}
@@ -85,7 +86,12 @@ export default function App() {
       )}
 
       {page === 'metodologi' && (
-        <MethodologySection explain={data.scoringExplain} onBack={() => setPage('beranda')} />
+        <MethodologySection
+          explain={data.scoringExplain}
+          embedded={false}
+          onBack={() => setPage('beranda')}
+          villages={data.villages}
+        />
       )}
 
       <Footer />
