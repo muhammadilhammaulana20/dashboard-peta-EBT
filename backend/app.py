@@ -20,10 +20,12 @@ def serve_index():
         return send_from_directory(FRONTEND_DIR, "index.html")
     return {"error": "Frontend not built yet. Run: cd frontend && npm run build"}, 503
 
+@app.route("/assets/<path:filename>")
+def serve_assets(filename):
+    return send_from_directory(os.path.join(FRONTEND_DIR, "assets"), filename)
+
 @app.route("/<path:path>")
 def serve_static(path):
-    if path.startswith("api/"):
-        return {"error": "Not found"}, 404
     file_path = os.path.join(FRONTEND_DIR, path)
     if os.path.exists(file_path):
         return send_from_directory(FRONTEND_DIR, path)
