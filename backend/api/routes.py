@@ -7,12 +7,30 @@ api = Blueprint("api", __name__, url_prefix="/api")
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(BASE, "data", "villages.json")
 
+_data_cache = None
+_norm_cache = None
 
 def _load_data():
+    global _data_cache
+    if _data_cache is not None:
+        return _data_cache
     if os.path.exists(DATA_PATH):
         with open(DATA_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
+            _data_cache = json.load(f)
+    return _data_cache or []
+
+def _get_norm_params():
+    global _norm_cache
+    if _norm_cache is not None:
+        return _norm_cache
+    data = _load_data()
+    keys = ["kk_belum_listrik", "ipm", "kemiskinan", "potensi_ebt", "jarak_pln", "biaya_per_kk"]
+    params = {}
+    for key in keys:
+        vals = [v.get(key, 0) for v in data]
+        params[key] = {"mn": min(vals), "mx": max(vals)}
+    _norm_cache = params
+    return params
 
 
 @api.route("/health")
@@ -156,18 +174,54 @@ def calculate_score():
         return jsonify({"error": "weights required"}), 400
 
     weights = body["weights"]
-    from scoring.ahp import AHP
-    ahp = AHP()
-    # override weights (untuk slider kalkulator interaktif)
-    if len(weights) == ahp.n:
-        ahp.weights = weights
-
     data = _load_data()
-    scored = ahp.score(data)
-    return jsonify({
-        "data": scored,
-        "weights": ahp.weights,
-    })
+    params = _get_norm_params()
+
+    scored = []
+    for v in data:
+        kk = v.get("kk_belum_listrik", 0)
+        ipm = v.get("ipm", 0)
+        kemiskinan = v.get("kemiskinan", 0)
+        ebt = v.get("potensi_ebt", 0)
+        jarak = v.get("jarak_pln", 0)
+        biaya = v.get("biaya_per_kk", 0)
+
+        def norm(val, key, higher):
+            p = params[key]
+            if p["mx"] == p["mn"]: return 0.5
+            return (val - p["mn"]) / (p["mx"] - p["mn"]) if higher else (p["mx"] - val) / (p["mx"] - p["mn"])
+
+        kk_n = norm(kk, "kk_belum_listrik", True)
+        ipm_n = norm(ipm, "ipm", False)
+        kem_n = norm(kemiskinan, "kemiskinan", True)
+        ebt_n = norm(ebt, "potensi_ebt", True)
+        jarak_n = norm(jarak, "jarak_pln", True)
+        biaya_n = norm(biaya, "biaya_per_kk", False)
+
+        sosial = (ipm_n + kem_n) / 2
+        raw = [
+            kk_n * weights[0],
+            sosial * weights[1],
+            ebt_n * weights[2],
+            jarak_n * weights[3],
+            biaya_n * weights[4],
+        ]
+        skor = sum(raw) * 100
+
+        scored.append({
+            "id": v["id"],
+            "desa": v["desa"],
+            "provinsi": v["provinsi"],
+            "kabupaten": v["kabupaten"],
+            "skor_ahp": round(skor, 1),
+            "ranking_ahp": 0,
+        })
+
+    scored.sort(key=lambda x: x["skor_ahp"], reverse=True)
+    for i, x in enumerate(scored):
+        x["ranking_ahp"] = i + 1
+
+    return jsonify({"data": scored[:50], "weights": weights})
 
 
 @api.route("/villages/scoring-data")

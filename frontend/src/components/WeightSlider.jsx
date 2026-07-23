@@ -1,32 +1,23 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { scoreAll, precomputeNormParams } from '../ahp'
+import { useState, useEffect, useMemo } from 'react'
 
 const COLORS = ['#f5c02c', '#6366f1', '#34d399', '#f97316', '#ec4899']
 
 export default function WeightSlider({ initialWeights, kriteriaNama }) {
   const [weights, setWeights] = useState(initialWeights || [0.25, 0.25, 0.20, 0.15, 0.15])
   const [results, setResults] = useState([])
-  const [ready, setReady] = useState(false)
-  const cacheRef = useRef(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetch('/api/villages/scoring-data')
+    fetch('/api/scoring/calculate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ weights }),
+    })
       .then(r => r.json())
-      .then(data => {
-        cacheRef.current = {
-          data,
-          normParams: precomputeNormParams(data),
-        }
-        setReady(true)
-      })
+      .then(res => setResults((res.data || []).slice(0, 10)))
       .catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    if (!cacheRef.current) return
-    const scored = scoreAll(cacheRef.current.data, weights, cacheRef.current.normParams)
-    setResults(scored.slice(0, 10))
-  }, [weights, ready])
+      .finally(() => setLoading(false))
+  }, [weights])
 
   const total = useMemo(() => weights.reduce((a, b) => a + b, 0), [weights])
 
@@ -66,14 +57,14 @@ export default function WeightSlider({ initialWeights, kriteriaNama }) {
         ))}
       </div>
 
-      {!ready && (
-        <div className="text-center py-8">
-          <div className="w-6 h-6 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-xs text-navy-400">Memuat data desa...</p>
+      {loading && (
+        <div className="text-center py-4">
+          <div className="w-5 h-5 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-1" />
+          <p className="text-xs text-navy-400">Menghitung ulang ranking...</p>
         </div>
       )}
 
-      {ready && (
+      {!loading && results.length > 0 && (
         <div>
           <h3 className="font-semibold text-white mb-3">10 Desa Prioritas — Berdasarkan Bobot Baru</h3>
           <div className="overflow-x-auto">

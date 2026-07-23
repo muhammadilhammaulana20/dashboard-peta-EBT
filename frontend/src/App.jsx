@@ -6,6 +6,21 @@ import RankingTable from './components/RankingTable'
 import MethodologySection from './components/MethodologySection'
 import ChartsSection from './components/ChartsSection'
 import Footer from './components/Footer'
+import useReveal from './useReveal'
+
+function Section({ children, style, className }) {
+  const [ref, visible] = useReveal(0.05)
+  return (
+    <div ref={ref} className={className} style={{
+      ...style,
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(24px)',
+      transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+    }}>
+      {children}
+    </div>
+  )
+}
 
 export default function App() {
   const [data, setData] = useState({ loading: true, error: null })
@@ -59,19 +74,21 @@ export default function App() {
 
       <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
 
-      <div style={{ background: '#0f1a2e' }}>
+      <Section style={{ background: '#0f1a2e' }}>
         <RankingTable provStats={data.provStats} />
-      </div>
+      </Section>
 
       <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
 
-      <div id="metodologi" style={{ background: '#111827' }}>
-        <MethodologySection explain={data.scoringExplain} embedded={true} />
-      </div>
+      <Section style={{ background: '#111827' }}>
+        <div id="metodologi">
+          <MethodologySection explain={data.scoringExplain} embedded={true} />
+        </div>
+      </Section>
 
       <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
 
-      <div style={{ background: '#0c1322' }}>
+      <Section style={{ background: '#0c1322' }}>
         <ChartsSection
           provStats={data.provStats}
           techStats={data.techStats}
@@ -80,7 +97,7 @@ export default function App() {
           scoringExplain={data.scoringExplain}
           dataSources={data.dataSources}
         />
-      </div>
+      </Section>
 
       <Footer />
     </div>

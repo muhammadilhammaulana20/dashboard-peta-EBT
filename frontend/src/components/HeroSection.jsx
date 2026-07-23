@@ -110,11 +110,12 @@ export default function HeroSection({ summary }) {
                 { label: 'Rata-rata IPM', value: rataIpm, sub: 'Indeks Pembangunan Manusia', accent: '#3b82f6' },
                 { label: 'Rata-rata Kemiskinan', value: `${rataMiskin}%`, sub: 'penduduk miskin', accent: '#34d399' },
               ].map(s => (
-                <div key={s.label} className="p-4" style={{
+                <div key={s.label} className="p-4 transition-all duration-300 hover:-translate-y-0.5" style={{
                   background: 'rgba(255,255,255,0.03)',
                   backdropFilter: 'blur(8px)',
                   border: '1px solid rgba(255,255,255,0.06)',
                   borderRadius: '6px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
                 }}>
                   <div className="text-xs font-medium text-navy-400 uppercase tracking-wider mb-1">{s.label}</div>
                   <div className="text-3xl sm:text-4xl font-extrabold leading-tight" style={{ color: s.accent }}>{s.value}</div>
