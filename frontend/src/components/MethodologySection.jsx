@@ -15,7 +15,7 @@ export default function MethodologySection({ explain, embedded, onBack }) {
           { id: 'slider', label: 'Simulasi Bobot' },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${tab === t.id ? 'bg-gold-500 text-navy-900' : 'text-navy-300 hover:text-white'}`}>
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${tab === t.id ? 'bg-teal-500 text-navy-900' : 'text-navy-300 hover:text-white'}`}>
             {t.label}
           </button>
         ))}
@@ -28,7 +28,7 @@ export default function MethodologySection({ explain, embedded, onBack }) {
             <div className="rounded-2xl border border-white/10 p-6 md:p-8" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <h2 className="text-lg font-bold text-white mb-4">Matriks Perbandingan Berpasangan</h2>
               <p className="text-sm text-navy-400 mb-4">
-                Skala Saaty 1–9. Nilai 1 = sama penting. Baris <strong className="text-gold-400">(i)</strong> dibanding kolom <strong className="text-gold-400">(j)</strong>.
+                Skala Saaty 1–9. Nilai 1 = sama penting. Baris <strong className="text-teal-400">(i)</strong> dibanding kolom <strong className="text-teal-400">(j)</strong>.
                 Angka &lt; 1 = baris kurang penting dari kolom.
               </p>
               <div className="overflow-x-auto">
@@ -47,7 +47,7 @@ export default function MethodologySection({ explain, embedded, onBack }) {
                         <td className="p-2.5 text-xs font-medium text-navy-200 whitespace-nowrap">{row.kriteria}</td>
                         {row.nilai.map((v, j) => (
                           <td key={j}
-                            className={`p-2.5 text-center font-mono text-xs ${i === j ? 'text-gold-400 font-bold' : 'text-navy-300'}`}>
+                            className={`p-2.5 text-center font-mono text-xs ${i === j ? 'text-teal-400 font-bold' : 'text-navy-300'}`}>
                             {v}
                           </td>
                         ))}
@@ -92,7 +92,7 @@ export default function MethodologySection({ explain, embedded, onBack }) {
             <h2 className="text-lg font-bold text-white mb-4">Kriteria & Bobot Final AHP</h2>
             <div className="space-y-5">
               {explain.kriteria.map((k, i) => {
-                const colors = ['#f5c02c', '#6366f1', '#34d399', '#f97316', '#ec4899']
+                const colors = ['#2a8a7f', '#6366f1', '#34d399', '#f97316', '#ec4899']
                 const details = [
                   'Semakin banyak KK belum listrik, semakin mendesak',
                   'Daerah dengan IPM rendah & kemiskinan tinggi didahulukan',
@@ -123,11 +123,11 @@ export default function MethodologySection({ explain, embedded, onBack }) {
         )}
 
         {/* Disclaimer */}
-        <div className="mt-8 p-5" style={{ background: 'rgba(245,192,44,0.04)', border: '1px solid rgba(245,192,44,0.15)', borderRadius: '6px' }}>
+        <div className="mt-8 p-5" style={{ background: 'rgba(42,138,127,0.04)', border: '1px solid rgba(42,138,127,0.15)', borderRadius: '6px' }}>
           <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 shrink-0 mt-0.5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <svg className="w-5 h-5 shrink-0 mt-0.5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <div>
-              <div className="text-sm font-semibold text-gold-400 mb-1">Catatan Akademis</div>
+              <div className="text-sm font-semibold text-teal-400 mb-1">Catatan Akademis</div>
               <div className="text-xs leading-relaxed text-navy-300 space-y-1">
                 <p>Data IDM bersumber real dari Kemendesa RI (indeks-desa-membangun-idm-tahun-2023.xlsx).</p>
                 <p>Data IPM dan kemiskinan per-desa merupakan estimasi berdasarkan rata-rata kabupaten dari BPS yang didistribusikan secara proporsional.</p>
@@ -143,9 +143,9 @@ export default function MethodologySection({ explain, embedded, onBack }) {
 
   if (embedded) {
     return (
-      <section className="w-full py-16 px-6 lg:px-12 xl:px-16" style={{ background: '#0d1421' }}>
+        <section className="w-full py-16 px-6 lg:px-12 xl:px-16" style={{ background: '#0d1421' }}>
         <div className="max-w-screen-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-gold-500/10 text-gold-400 border border-gold-500/20 mb-3">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-teal-500/10 text-teal-400 border border-teal-500/20 mb-3">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
             METODOLOGI AHP
           </div>
@@ -164,12 +164,12 @@ export default function MethodologySection({ explain, embedded, onBack }) {
   return (
     <section className="w-full min-h-screen pt-24 pb-16 px-6 lg:px-12 xl:px-16" style={{ background: 'linear-gradient(135deg, #0a0f1a 0%, #0f1d35 30%, #162a4a 60%, #0f1d35 100%)' }}>
       <div className="max-w-screen-2xl mx-auto">
-        <button onClick={onBack} className="flex items-center gap-2 text-navy-400 hover:text-gold-400 transition mb-6 cursor-pointer">
+        <button onClick={onBack} className="flex items-center gap-2 text-navy-400 hover:text-teal-400 transition mb-6 cursor-pointer">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
           Kembali ke Dashboard
         </button>
 
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-gold-500/10 text-gold-400 border border-gold-500/20 mb-3">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-teal-500/10 text-teal-400 border border-teal-500/20 mb-3">
           METODOLOGI AHP
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2">Metode Analytic Hierarchy Process (AHP)</h1>

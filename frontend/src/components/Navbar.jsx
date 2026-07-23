@@ -39,20 +39,20 @@ export default function Navbar() {
       <div className="w-full px-6 lg:px-12 xl:px-16">
         <div className="flex items-center justify-between h-16 max-w-screen-2xl mx-auto">
           <button onClick={() => scrollTo('beranda')} className="flex items-center gap-3 cursor-pointer shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gold-500 to-gold-700 flex items-center justify-center font-bold text-navy-900 text-sm">P</div>
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center font-bold text-navy-900 text-sm">P</div>
             <div>
-              <span className="font-bold text-white text-base">PETA<span className="text-gold-400">-EBT</span></span>
+              <span className="font-bold text-white text-base">PETA<span className="text-teal-400">-EBT</span></span>
               <span className="hidden sm:inline text-xs text-navy-400 ml-2 font-medium">Dashboard Prioritas Elektrifikasi</span>
             </div>
           </button>
 
           <div className="hidden md:flex items-center gap-1">
             <button onClick={() => scrollTo('beranda')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${active === 'beranda' ? 'bg-gold-500/10 text-gold-400' : 'text-navy-300 hover:text-white hover:bg-white/5'}`}>
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${active === 'beranda' ? 'bg-teal-500/10 text-teal-400' : 'text-navy-300 hover:text-white hover:bg-white/5'}`}>
               Beranda
             </button>
             <button onClick={() => scrollTo('metodologi')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${active === 'metodologi' ? 'bg-gold-500/10 text-gold-400' : 'text-navy-300 hover:text-white hover:bg-white/5'}`}>
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${active === 'metodologi' ? 'bg-teal-500/10 text-teal-400' : 'text-navy-300 hover:text-white hover:bg-white/5'}`}>
               Metodologi AHP
             </button>
           </div>

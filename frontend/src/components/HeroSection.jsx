@@ -40,7 +40,7 @@ export default function HeroSection({ summary }) {
         if (d.y < 0 || d.y > canvas.height) d.dy *= -1
         ctx.beginPath()
         ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(245, 192, 44, ${d.o})`
+        ctx.fillStyle = `rgba(42, 138, 127, ${d.o})`
         ctx.fill()
         for (let j = i + 1; j < dots.length; j++) {
           const d2 = dots[j]
@@ -51,7 +51,7 @@ export default function HeroSection({ summary }) {
             ctx.beginPath()
             ctx.moveTo(d.x, d.y)
             ctx.lineTo(d2.x, d2.y)
-            ctx.strokeStyle = `rgba(245, 192, 44, ${0.04 * (1 - dist / 100)})`
+            ctx.strokeStyle = `rgba(42, 138, 127, ${0.04 * (1 - dist / 100)})`
             ctx.lineWidth = 0.4
             ctx.stroke()
           }
@@ -67,20 +67,16 @@ export default function HeroSection({ summary }) {
     <section className="relative w-full min-h-[85vh] flex items-center overflow-hidden" style={{ background: '#0a0f1a' }}>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(245,192,44,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(245,192,44,.12) 1px, transparent 1px)', backgroundSize: '70px 70px' }} />
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(42,138,127,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(42,138,127,.12) 1px, transparent 1px)', backgroundSize: '70px 70px' }} />
 
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/30 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-500/30 to-transparent" />
 
       <div className="relative w-full px-6 lg:px-12 xl:px-16 py-20">
         <div className="grid lg:grid-cols-5 gap-10 items-center max-w-screen-2xl mx-auto">
           <div className="lg:col-span-3">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm text-xs font-semibold mb-6 text-gold-400" style={{ background: 'rgba(245,192,44,0.06)', border: '1px solid rgba(245,192,44,0.25)' }}>
-              <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M11.983 1.907a.75.75 0 00-1.466-.298l-1.5 7.5a.75.75 0 00.733.891h4.5a.75.75 0 00.738-.875l-.75-5.25a.75.75 0 00-1.48.134l-.275 1.924-1.5-4.026zM6.75 8.25a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm3 0a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75z"/></svg>
-              SISTEM PENDUKUNG KEPUTUSAN — AHP
-            </div>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] mb-6 tracking-tight">
               Prioritas Elektrifikasi<br/>
-              <span className="text-gold-400">Desa 3T Berbasis Data</span>
+              <span className="text-teal-400">Desa 3T Berbasis Data</span>
             </h1>
             <p className="text-lg sm:text-xl leading-relaxed max-w-xl mb-8" style={{ color: '#94a3b8' }}>
               Sistem Pendukung Keputusan untuk menentukan desa prioritas dedieselisasi
@@ -90,7 +86,7 @@ export default function HeroSection({ summary }) {
             </p>
             <div className="flex flex-wrap gap-4">
               <button onClick={() => { const el = document.getElementById('ranking'); if (el) el.scrollIntoView({ behavior: 'smooth' }) }}
-                className="inline-flex items-center gap-2 px-7 py-3.5 font-bold text-sm" style={{ background: '#f5c02c', color: '#0a0f1a', borderRadius: '6px' }}>
+                className="inline-flex items-center gap-2 px-7 py-3.5 font-bold text-sm" style={{ background: '#2a8a7f', color: '#0a0f1a', borderRadius: '6px' }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h3v16H3V4zm6 4h3v12H9V8zm6-2h3v14h-3V6z"/></svg>
                 Lihat Ranking Prioritas
               </button>
@@ -105,7 +101,7 @@ export default function HeroSection({ summary }) {
           <div className="lg:col-span-2">
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Total Desa', value: totalDesa.toLocaleString('id-ID'), sub: `${totalProv} provinsi`, accent: '#f5c02c' },
+                { label: 'Total Desa', value: totalDesa.toLocaleString('id-ID'), sub: `${totalProv} provinsi`, accent: '#2a8a7f' },
                 { label: 'KK Belum Listrik', value: totalKK.toLocaleString('id-ID'), sub: 'kepala keluarga', accent: '#ef4444' },
                 { label: 'Rata-rata IPM', value: rataIpm, sub: 'Indeks Pembangunan Manusia', accent: '#3b82f6' },
                 { label: 'Rata-rata Kemiskinan', value: `${rataMiskin}%`, sub: 'penduduk miskin', accent: '#34d399' },

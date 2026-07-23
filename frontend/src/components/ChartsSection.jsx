@@ -10,15 +10,15 @@ export default function ChartsSection({ provStats, techStats, scoreDist, idmStat
   const maxProv = Math.max(...topProv.map(p => p.rata_skor_ahp || 0), 1)
   const maxDist = Math.max(...(scoreDist || []).map(d => d.jumlah || 0), 1)
   const maxIdm = Math.max(...(idmStatus || []).map(d => d.jumlah || 0), 1)
-  const colors = ['#f5c02c', '#6366f1', '#34d399', '#f97316', '#ec4899', '#06b6d4', '#a78bfa', '#f472b6']
-  const idmColors = { Mandiri: '#34d399', Maju: '#6366f1', Berkembang: '#f5c02c', Tertinggal: '#f97316', 'Tidak Diketahui': '#64748b' }
-  const distColors = ['#334155', '#475569', '#f5c02c', '#fbbf24', '#34d399']
+  const colors = ['#2a8a7f', '#6366f1', '#34d399', '#f97316', '#ec4899', '#06b6d4', '#a78bfa', '#f472b6']
+  const idmColors = { Mandiri: '#34d399', Maju: '#6366f1', Berkembang: '#2a8a7f', Tertinggal: '#8b7e6e', 'Tidak Diketahui': '#64748b' }
+  const distColors = ['#334155', '#475569', '#2a8a7f', '#fbbf24', '#34d399']
   const techTotal = techStats?.reduce((s, d) => s + d.jumlah, 0) || 1
 
   return (
-    <section className="w-full py-16 px-6 lg:px-12 xl:px-16" style={{ background: '#0a0f1a' }}>
+    <section className="w-full py-16 px-6 lg:px-12 xl:px-16" style={{ background: '#0f1828' }}>
       <div className="max-w-screen-2xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-gold-500/10 text-gold-400 border border-gold-500/20 mb-3">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-teal-500/10 text-teal-400 border border-teal-500/20 mb-3">
           ANALISIS & VISUALISASI
         </div>
         <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-8">Analisis Multi-Dimensi</h2>
@@ -39,7 +39,7 @@ export default function ChartsSection({ provStats, techStats, scoreDist, idmStat
                     <span className="text-white font-semibold ml-2">{v.skor_ahp?.toFixed(1)}</span>
                   </div>
                   <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${(v.skor_ahp / maxTop) * 100}%`, background: i < 3 ? '#f5c02c' : '#475569' }} />
+                    <div className="h-full rounded-full" style={{ width: `${(v.skor_ahp / maxTop) * 100}%`, background: i < 3 ? '#2a8a7f' : '#475569' }} />
                   </div>
                 </div>
               ))}
@@ -153,8 +153,8 @@ export default function ChartsSection({ provStats, techStats, scoreDist, idmStat
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {(dataSources || []).map(s => (
               <div key={s.nama} className="flex items-start gap-3 p-3.5 rounded-xl bg-white/5 border border-white/5">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${s.real ? 'bg-green-500/10' : 'bg-gold-500/10'}`}>
-                  <div className={`w-2.5 h-2.5 rounded-full ${s.real ? 'bg-green-500' : 'bg-gold-500'}`} />
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${s.real ? 'bg-green-500/10' : 'bg-teal-500/10'}`}>
+                  <div className={`w-2.5 h-2.5 rounded-full ${s.real ? 'bg-green-500' : 'bg-teal-500'}`} />
                 </div>
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-navy-100">{s.nama}</div>
@@ -162,7 +162,7 @@ export default function ChartsSection({ provStats, techStats, scoreDist, idmStat
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-navy-500">
                     <span>{s.sumber}</span>
                     <span>{s.tahun}</span>
-                    {s.url && <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-gold-400 hover:underline">Kunjungi →</a>}
+                    {s.url && <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-teal-400 hover:underline">Kunjungi →</a>}
                   </div>
                 </div>
               </div>

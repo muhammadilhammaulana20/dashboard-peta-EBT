@@ -21,16 +21,18 @@
   --color-navy-700: #273b63;
   --color-navy-800: #1a2742;
   --color-navy-900: #0d1421;
-  --color-gold-50: #fef9e7;
-  --color-gold-100: #fdf0c4;
-  --color-gold-200: #fbe49e;
-  --color-gold-300: #f9d878;
-  --color-gold-400: #f7cc52;
-  --color-gold-500: #f5c02c;
-  --color-gold-600: #d4a723;
-  --color-gold-700: #a8871c;
-  --color-gold-800: #7d6614;
-  --color-gold-900: #52440d;
+  --color-teal-50: #eef9f7;
+  --color-teal-100: #d5f0eb;
+  --color-teal-200: #aae1d6;
+  --color-teal-300: #7ad1c0;
+  --color-teal-400: #4fc0ab;
+  --color-teal-500: #2a8a7f;
+  --color-teal-600: #237269;
+  --color-teal-700: #1c5a53;
+  --color-teal-800: #15433d;
+  --color-teal-900: #0e2b27;
+  --color-tan-400: #8b7e6e;
+  --color-tan-500: #7a6e5e;
 }
 
 body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }

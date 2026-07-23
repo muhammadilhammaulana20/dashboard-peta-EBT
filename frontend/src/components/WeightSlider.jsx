@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 
-const COLORS = ['#f5c02c', '#6366f1', '#34d399', '#f97316', '#ec4899']
+const COLORS = ['#2a8a7f', '#6366f1', '#34d399', '#f97316', '#ec4899']
 
 export default function WeightSlider({ initialWeights, kriteriaNama }) {
   const [weights, setWeights] = useState(initialWeights || [0.25, 0.25, 0.20, 0.15, 0.15])
@@ -35,7 +35,7 @@ export default function WeightSlider({ initialWeights, kriteriaNama }) {
       <h2 className="text-lg font-bold text-white mb-2">Simulasi Bobot Interaktif</h2>
       <p className="text-sm text-navy-400 mb-6">
         Geser slider untuk mengubah prioritas tiap kriteria. Ranking berubah otomatis.
-        Total bobot: <span className="text-gold-400 font-bold">{(total * 100).toFixed(0)}%</span>
+        Total bobot: <span className="text-teal-400 font-bold">{(total * 100).toFixed(0)}%</span>
       </p>
 
       <div className="space-y-5 mb-8">
@@ -48,7 +48,7 @@ export default function WeightSlider({ initialWeights, kriteriaNama }) {
             <div className="relative">
               <input type="range" min="0" max="100" value={Math.round(w * 100)}
                 onChange={e => updateWeight(i, parseInt(e.target.value) / 100)}
-                className="w-full h-2 rounded-full appearance-none cursor-pointer bg-white/10 accent-gold-500"
+                className="w-full h-2 rounded-full appearance-none cursor-pointer bg-white/10 accent-teal-500"
                 style={{ accentColor: COLORS[i] }}
               />
               <div className="h-2 rounded-full bg-white/10 absolute top-0 left-0 w-full pointer-events-none -z-10" />
@@ -59,7 +59,7 @@ export default function WeightSlider({ initialWeights, kriteriaNama }) {
 
       {loading && (
         <div className="text-center py-4">
-          <div className="w-5 h-5 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-1" />
+          <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-1" />
           <p className="text-xs text-navy-400">Menghitung ulang ranking...</p>
         </div>
       )}
@@ -79,11 +79,11 @@ export default function WeightSlider({ initialWeights, kriteriaNama }) {
               </thead>
               <tbody>
                 {results.map((v, i) => (
-                  <tr key={v.id} className={`border-b border-white/5 ${i < 3 ? 'bg-gold-500/5' : ''}`}>
-                    <td className={`p-2.5 font-mono text-xs ${i < 3 ? 'text-gold-400' : 'text-navy-400'}`}>{i + 1}</td>
+                  <tr key={v.id} className={`border-b border-white/5 ${i < 3 ? 'bg-teal-500/5' : ''}`}>
+                    <td className={`p-2.5 font-mono text-xs ${i < 3 ? 'text-teal-400' : 'text-navy-400'}`}>{i + 1}</td>
                     <td className="p-2.5 text-navy-100 font-medium whitespace-nowrap">{v.desa}</td>
                     <td className="p-2.5 text-navy-400">{v.provinsi}</td>
-                    <td className="p-2.5 font-bold text-gold-400">{v.skor_ahp?.toFixed(1)}</td>
+                    <td className="p-2.5 font-bold text-teal-400">{v.skor_ahp?.toFixed(1)}</td>
                   </tr>
                 ))}
               </tbody>

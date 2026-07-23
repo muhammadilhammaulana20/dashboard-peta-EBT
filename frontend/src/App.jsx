@@ -48,7 +48,7 @@ export default function App() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0f1a' }}>
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-navy-300 text-sm">Memuat dashboard...</p>
         </div>
       </div>
@@ -72,23 +72,23 @@ export default function App() {
       <Navbar />
       <HeroSection summary={data.summary} />
 
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-teal-500/20 to-transparent" />
 
-      <Section style={{ background: '#0f1a2e' }}>
+      <Section style={{ background: '#0e1626' }}>
         <RankingTable provStats={data.provStats} />
       </Section>
 
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-teal-500/20 to-transparent" />
 
-      <Section style={{ background: '#111827' }}>
+      <Section style={{ background: '#0d1421' }}>
         <div id="metodologi">
           <MethodologySection explain={data.scoringExplain} embedded={true} />
         </div>
       </Section>
 
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-teal-500/20 to-transparent" />
 
-      <Section style={{ background: '#0c1322' }}>
+      <Section style={{ background: '#0f1828' }}>
         <ChartsSection
           provStats={data.provStats}
           techStats={data.techStats}
