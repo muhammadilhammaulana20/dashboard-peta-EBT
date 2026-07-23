@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { fetchVillage } from '../api'
 import VillageModal from './VillageModal'
 
@@ -13,12 +13,23 @@ async function get(path) {
 
 export default function RankingTable({ provStats }) {
   const [filter, setFilter] = useState('')
+  const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [result, setResult] = useState({ data: [], total: 0, total_pages: 0 })
   const [error, setError] = useState(false)
+  const debounceRef = useRef(null)
+
+  const onSearchChange = (val) => {
+    setSearchInput(val)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      setSearch(val)
+      setPage(1)
+    }, 300)
+  }
 
   const fetchData = useCallback(async () => {
     try {
@@ -36,7 +47,8 @@ export default function RankingTable({ provStats }) {
 
   useEffect(() => { fetchData() }, [fetchData])
 
-  useEffect(() => { setPage(1) }, [filter, search])
+  useEffect(() => { setPage(1) }, [filter])
+  useEffect(() => { return () => clearTimeout(debounceRef.current) }, [])
 
   const handleRowClick = async (v) => {
     try {
@@ -95,7 +107,7 @@ export default function RankingTable({ provStats }) {
 
         <div className="relative max-w-md mb-6">
           <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-navy-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" placeholder="Cari desa, kecamatan, kabupaten..." value={search} onChange={e => setSearch(e.target.value)}
+          <input type="text" placeholder="Cari desa, kecamatan, kabupaten..." value={searchInput} onChange={e => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-navy-100 text-sm placeholder:text-navy-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 focus:border-gold-500/50 transition" />
         </div>
 
