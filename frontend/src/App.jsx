@@ -59,19 +59,19 @@ export default function App() {
 
       <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
 
-      <div style={{ background: '#0d1421' }}>
+      <div style={{ background: '#0f1a2e' }}>
         <RankingTable provStats={data.provStats} />
       </div>
 
       <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
 
-      <div id="metodologi" style={{ background: '#0f1625' }}>
+      <div id="metodologi" style={{ background: '#111827' }}>
         <MethodologySection explain={data.scoringExplain} embedded={true} />
       </div>
 
       <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
 
-      <div style={{ background: '#0a0f1a' }}>
+      <div style={{ background: '#0c1322' }}>
         <ChartsSection
           provStats={data.provStats}
           techStats={data.techStats}

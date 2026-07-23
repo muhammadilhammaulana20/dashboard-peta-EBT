@@ -18,17 +18,18 @@ export default function RankingTable({ provStats }) {
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [result, setResult] = useState({ data: [], total: 0, total_pages: 0 })
+  const [error, setError] = useState(false)
 
   const fetchData = useCallback(async () => {
-    setLoading(true)
     try {
       const qs = new URLSearchParams({ page, per_page: PAGE_SIZE })
       if (filter) qs.set('provinsi', filter)
       if (search.trim()) qs.set('search', search.trim())
       const res = await get(`/villages?${qs}`)
       setResult(res)
+      setError(false)
     } catch (e) {
-      setResult({ data: [], total: 0, total_pages: 0 })
+      setError(true)
     }
     setLoading(false)
   }, [filter, search, page])
@@ -109,10 +110,12 @@ export default function RankingTable({ provStats }) {
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
-                  <tr><td colSpan={16} className="text-center py-16 text-navy-500 text-sm">Memuat data...</td></tr>
-                ) : result.data.length === 0 ? (
+                {error ? (
+                  <tr><td colSpan={16} className="text-center py-16 text-navy-500 text-sm">Gagal memuat data</td></tr>
+                ) : result.data.length === 0 && !loading ? (
                   <tr><td colSpan={16} className="text-center py-16 text-navy-500 text-sm">Tidak ada desa ditemukan</td></tr>
+                ) : result.data.length === 0 && loading ? (
+                  <tr><td colSpan={16} className="text-center py-16 text-navy-500 text-sm">Memuat data...</td></tr>
                 ) : (
                   result.data.map((v, i) => {
                     const globalIdx = (page - 1) * PAGE_SIZE + i
