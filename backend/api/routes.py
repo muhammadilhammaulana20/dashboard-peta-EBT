@@ -170,6 +170,25 @@ def calculate_score():
     })
 
 
+@api.route("/villages/scoring-data")
+def get_scoring_data():
+    data = _load_data()
+    compact = []
+    for v in data:
+        compact.append({
+            "id": v["id"],
+            "desa": v["desa"],
+            "kabupaten": v["kabupaten"],
+            "provinsi": v["provinsi"],
+            "kk_belum_listrik": v.get("kk_belum_listrik", 0),
+            "ipm": v.get("ipm", 0),
+            "kemiskinan": v.get("kemiskinan", 0),
+            "potensi_ebt": v.get("potensi_ebt", 0),
+            "jarak_pln": v.get("jarak_pln", 0),
+            "biaya_per_kk": v.get("biaya_per_kk", 0),
+        })
+    return jsonify(compact)
+
 @api.route("/data/sources")
 def get_data_sources():
     return jsonify([

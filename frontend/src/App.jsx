@@ -53,25 +53,35 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen w-full" style={{ background: '#0d1421' }}>
+    <div className="w-full" style={{ background: '#0a0f1a' }}>
       <Navbar />
       <HeroSection summary={data.summary} />
-      <RankingTable provStats={data.provStats} />
-      <div id="metodologi">
-        <MethodologySection
-          explain={data.scoringExplain}
-          embedded={true}
-          villages={data.villages}
+
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
+
+      <div style={{ background: '#0d1421' }}>
+        <RankingTable provStats={data.provStats} />
+      </div>
+
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
+
+      <div id="metodologi" style={{ background: '#0f1625' }}>
+        <MethodologySection explain={data.scoringExplain} embedded={true} />
+      </div>
+
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
+
+      <div style={{ background: '#0a0f1a' }}>
+        <ChartsSection
+          provStats={data.provStats}
+          techStats={data.techStats}
+          scoreDist={data.scoreDist}
+          idmStatus={data.idmStatus}
+          scoringExplain={data.scoringExplain}
+          dataSources={data.dataSources}
         />
       </div>
-      <ChartsSection
-        provStats={data.provStats}
-        techStats={data.techStats}
-        scoreDist={data.scoreDist}
-        idmStatus={data.idmStatus}
-        scoringExplain={data.scoringExplain}
-        dataSources={data.dataSources}
-      />
+
       <Footer />
     </div>
   )

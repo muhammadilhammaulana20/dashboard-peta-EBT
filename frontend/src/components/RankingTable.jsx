@@ -52,7 +52,7 @@ export default function RankingTable({ provStats }) {
       const rows = res.data.map(v =>
         [v.ranking_ahp, v.desa, v.kecamatan, v.kabupaten, v.provinsi, v.idm, v.idm_status, v.iks, v.ike, v.ikl, v.kk_belum_listrik, v.ipm, `${v.kemiskinan}%`, v.potensi_ebt, v.skor_ahp, v.rekomendasi_teknologi].join(',')
       )
-      const csv = [['Ranking','Desa','Kecamatan','Kabupaten','Provinsi','Nilai IDM','Status IDM','IKS','IKE','IKL','KK Belum','IPM','Kemiskinan','Potensi EBT','Skor AHP','Rekomendasi'].join(','), ...rows].join('\n')
+      const csv = [['Ranking','Desa','Kecamatan','Kabupaten','Provinsi','Nilai IDM','Status IDM','IKS','IKE','IKL','KK Belum Listrik','IPM','Kemiskinan','Potensi EBT','Skor AHP','Rekomendasi Teknologi'].join(','), ...rows].join('\n')
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
@@ -103,7 +103,7 @@ export default function RankingTable({ provStats }) {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-                  {['#', 'Desa', 'Kecamatan', 'Kabupaten', 'Provinsi', 'Nilai IDM', 'Status IDM', 'IKS', 'IKE', 'IKL', 'KK Belum', 'IPM', 'Kemis', 'Potensi', 'Skor AHP', 'Rekomendasi'].map(h => (
+                  {['#', 'Desa', 'Kecamatan', 'Kabupaten', 'Provinsi', 'Nilai IDM', 'Status IDM', 'IKS', 'IKE', 'IKL', 'KK Belum Listrik', 'IPM', 'Kemiskinan', 'Potensi EBT', 'Skor AHP', 'Rekomendasi'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-navy-400 uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -121,9 +121,15 @@ export default function RankingTable({ provStats }) {
                       <tr key={v.id} onClick={() => handleRowClick(v)}
                         className={`border-t border-white/5 hover:bg-white/5 transition cursor-pointer ${isTop3 ? 'bg-gold-500/5' : ''}`}>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={isTop3 ? 'text-lg' : 'text-xs text-navy-500 font-mono'}>
-                            {globalIdx === 0 ? '🥇' : globalIdx === 1 ? '🥈' : globalIdx === 2 ? '🥉' : v.ranking_ahp}
-                          </span>
+                          {isTop3 ? (
+                            <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold ${
+                              globalIdx === 0 ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40' :
+                              globalIdx === 1 ? 'bg-slate-300/10 text-slate-300 border border-slate-300/30' :
+                              'bg-amber-600/10 text-amber-600 border border-amber-600/30'
+                            }`}>{v.ranking_ahp}</span>
+                          ) : (
+                            <span className="text-xs text-navy-500 font-mono">{v.ranking_ahp}</span>
+                          )}
                         </td>
                         <td className="px-4 py-3 font-semibold text-white whitespace-nowrap">{v.desa}</td>
                         <td className="px-4 py-3 text-navy-300 whitespace-nowrap">{v.kecamatan}</td>

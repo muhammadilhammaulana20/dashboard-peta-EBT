@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import WeightSlider from './WeightSlider'
 
-export default function MethodologySection({ explain, embedded, onBack, villages }) {
+export default function MethodologySection({ explain, embedded, onBack }) {
   const [tab, setTab] = useState('ahp')
   if (!explain) return null
 
@@ -61,19 +61,26 @@ export default function MethodologySection({ explain, embedded, onBack, villages
             <div className="rounded-2xl border border-white/10 p-6 md:p-8" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <h2 className="text-lg font-bold text-white mb-4">Uji Konsistensi</h2>
               <div className="grid sm:grid-cols-3 gap-4">
-                {[
-                  { label: 'Consistency Index (CI)', value: explain.konsistensi.ci },
-                  { label: 'Consistency Ratio (CR)', value: explain.konsistensi.cr },
-                  { label: 'Status', value: explain.konsistensi.konsisten ? 'Konsisten ✓' : 'Tidak Konsisten ✗', color: explain.konsistensi.konsisten ? 'text-green-400' : 'text-red-400' },
-                ].map(d => (
-                  <div key={d.label} className="p-4 rounded-xl bg-white/5 border border-white/5">
-                    <div className="text-xs text-navy-400 mb-1">{d.label}</div>
-                    <div className={`text-2xl font-bold ${d.color || 'text-white'}`}>{d.value}</div>
-                    {d.label === 'Consistency Ratio (CR)' && (
-                      <div className="text-xs text-navy-500 mt-1">Syarat: CR &lt; 0.1 — {explain.konsistensi.cr < 0.1 ? 'Terpenuhi ✓' : 'Tidak ✗'}</div>
-                    )}
+                <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                  <div className="text-xs text-navy-400 mb-1">Consistency Index (CI)</div>
+                  <div className="text-2xl font-bold text-white">{explain.konsistensi.ci}</div>
+                </div>
+                <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                  <div className="text-xs text-navy-400 mb-1">Consistency Ratio (CR)</div>
+                  <div className="text-2xl font-bold text-white">{explain.konsistensi.cr}</div>
+                  <div className="text-xs text-navy-500 mt-1">Syarat: CR &lt; 0.1</div>
+                </div>
+                <div className={`p-4 rounded-xl border ${explain.konsistensi.konsisten ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
+                  <div className="text-xs text-navy-400 mb-1">Status</div>
+                  <div className={`text-lg font-bold ${explain.konsistensi.konsisten ? 'text-green-400' : 'text-red-400'}`}>
+                    {explain.konsistensi.konsisten ? 'Memenuhi Syarat' : 'Tidak Memenuhi Syarat'}
                   </div>
-                ))}
+                  <div className={`text-xs mt-1 ${explain.konsistensi.konsisten ? 'text-green-500/70' : 'text-red-500/70'}`}>
+                    {explain.konsistensi.konsisten
+                      ? 'Matriks perbandingan dinyatakan konsisten dan bobot dapat digunakan untuk skoring.'
+                      : 'Periksa kembali penilaian perbandingan berpasangan.'}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -114,6 +121,22 @@ export default function MethodologySection({ explain, embedded, onBack, villages
         {tab === 'slider' && (
           <WeightSlider initialWeights={explain.kriteria.map(k => k.bobot)} kriteriaNama={explain.kriteria.map(k => k.nama)} />
         )}
+
+        {/* Disclaimer */}
+        <div className="mt-8 p-5" style={{ background: 'rgba(245,192,44,0.04)', border: '1px solid rgba(245,192,44,0.15)', borderRadius: '6px' }}>
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 shrink-0 mt-0.5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+              <div className="text-sm font-semibold text-gold-400 mb-1">Catatan Akademis</div>
+              <div className="text-xs leading-relaxed text-navy-300 space-y-1">
+                <p>Data IDM bersumber real dari Kemendesa RI (indeks-desa-membangun-idm-tahun-2023.xlsx).</p>
+                <p>Data IPM dan kemiskinan per-desa merupakan estimasi berdasarkan rata-rata kabupaten dari BPS yang didistribusikan secara proporsional.</p>
+                <p>Data potensi EBT dan biaya per-KK merupakan skor proxy berdasarkan data IDM dan literatur teknis, bukan hasil survei lapangan.</p>
+                <p>Sistem ini adalah prototype Decision Support System dan bukan merupakan penetapan kebijakan final.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   )
