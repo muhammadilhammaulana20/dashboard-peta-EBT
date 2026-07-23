@@ -1,12 +1,14 @@
 import { useEffect, useRef } from 'react'
 
-export default function HeroSection({ villages }) {
+export default function HeroSection({ summary }) {
   const canvasRef = useRef(null)
 
-  const totalDesa = villages.length
-  const totalProv = new Set(villages.map(v => v.provinsi)).size
-  const totalKK = villages.reduce((s, v) => s + (v.kk_terdampak || 0), 0)
-  const rataSkor = totalDesa ? (villages.reduce((s, v) => s + v.skor_ahp, 0) / totalDesa).toFixed(1) : '0'
+  const totalDesa = summary?.total_desa || 0
+  const totalProv = summary?.total_provinsi || 0
+  const totalKK = summary?.total_kk_terdampak || 0
+  const rataSkor = summary?.rata_skor_ahp || '0'
+  const rataIpm = summary?.rata_ipm || '—'
+  const rataMiskin = summary?.rata_kemiskinan || '—'
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -118,8 +120,8 @@ export default function HeroSection({ villages }) {
               {[
                 { label: 'Total Desa', value: totalDesa, sub: `${totalProv} provinsi`, color: 'from-gold-500/20 to-gold-600/5', border: 'border-gold-500/30', accent: 'text-gold-400' },
                 { label: 'KK Belum Listrik', value: totalKK.toLocaleString('id-ID'), sub: 'kepala keluarga', color: 'from-red-500/20 to-red-600/5', border: 'border-red-500/30', accent: 'text-red-400' },
-                { label: 'Rata-rata IPM', value: villages.length ? (villages.reduce((s, v) => s + v.ipm, 0) / villages.length).toFixed(1) : '—', sub: 'Indeks Pembangunan Manusia', color: 'from-blue-500/20 to-blue-600/5', border: 'border-blue-500/30', accent: 'text-blue-400' },
-                { label: 'Rata-rata Kemiskinan', value: villages.length ? `${(villages.reduce((s, v) => s + v.kemiskinan, 0) / villages.length).toFixed(1)}%` : '—', sub: 'penduduk miskin', color: 'from-emerald-500/20 to-emerald-600/5', border: 'border-emerald-500/30', accent: 'text-emerald-400' },
+                { label: 'Rata-rata IPM', value: rataIpm, sub: 'Indeks Pembangunan Manusia', color: 'from-blue-500/20 to-blue-600/5', border: 'border-blue-500/30', accent: 'text-blue-400' },
+                { label: 'Rata-rata Kemiskinan', value: `${rataMiskin}%`, sub: 'penduduk miskin', color: 'from-emerald-500/20 to-emerald-600/5', border: 'border-emerald-500/30', accent: 'text-emerald-400' },
               ].map(s => (
                 <div key={s.label} className={`bg-gradient-to-br ${s.color} backdrop-blur rounded-2xl p-5 border ${s.border} hover:scale-[1.02] transition-transform`}>
                   <div className="text-xs font-medium text-navy-300 uppercase tracking-wider mb-1">{s.label}</div>

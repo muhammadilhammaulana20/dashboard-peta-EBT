@@ -1,7 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 
-export default function ChartsSection({ villages, provStats, techStats, scoreDist, idmStatus, scoringExplain, dataSources }) {
-  const top10 = useMemo(() => villages?.filter(v => v.skor_ahp != null).sort((a, b) => b.skor_ahp - a.skor_ahp).slice(0, 10) || [], [villages])
+export default function ChartsSection({ provStats, techStats, scoreDist, idmStatus, scoringExplain, dataSources }) {
+  const [top10, setTop10] = useState([])
+  useEffect(() => {
+    fetch('/api/villages?per_page=10').then(r => r.json()).then(res => setTop10(res.data || [])).catch(() => {})
+  }, [])
   const topProv = useMemo(() => [...(provStats || [])].sort((a, b) => (b.rata_skor_ahp || 0) - (a.rata_skor_ahp || 0)).slice(0, 10), [provStats])
   const maxTop = Math.max(...top10.map(v => v.skor_ahp || 0), 1)
   const maxProv = Math.max(...topProv.map(p => p.rata_skor_ahp || 0), 1)

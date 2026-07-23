@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchSummary, fetchVillages, fetchProvinceStats, fetchTechnologyStats, fetchScoreDistribution, fetchIdmStatus, fetchScoringExplain, fetchDataSources } from './api'
+import { fetchSummary, fetchProvinceStats, fetchTechnologyStats, fetchScoreDistribution, fetchIdmStatus, fetchScoringExplain, fetchDataSources } from './api'
 import Navbar from './components/Navbar'
 import HeroSection from './components/HeroSection'
 import RankingTable from './components/RankingTable'
@@ -9,12 +9,10 @@ import Footer from './components/Footer'
 
 export default function App() {
   const [data, setData] = useState({ loading: true, error: null })
-  const [page, setPage] = useState('beranda')
 
   useEffect(() => {
     Promise.all([
       fetchSummary().catch(() => null),
-      fetchVillages({ per_page: 9999 }).catch(() => ({ data: [] })),
       fetchProvinceStats().catch(() => []),
       fetchTechnologyStats().catch(() => []),
       fetchScoreDistribution().catch(() => []),
@@ -22,10 +20,10 @@ export default function App() {
       fetchScoringExplain().catch(() => null),
       fetchDataSources().catch(() => []),
     ])
-    .then(([summary, villagesResp, provStats, techStats, scoreDist, idmStatus, scoringExplain, dataSources]) => {
+    .then(([summary, provStats, techStats, scoreDist, idmStatus, scoringExplain, dataSources]) => {
       setData({
         loading: false, error: null,
-        summary, villages: villagesResp.data || [], provStats, techStats, scoreDist, idmStatus, scoringExplain, dataSources,
+        summary, provStats, techStats, scoreDist, idmStatus, scoringExplain, dataSources,
       })
     })
     .catch(err => setData({ loading: false, error: err.message }))
@@ -54,46 +52,26 @@ export default function App() {
     )
   }
 
-  const metodologiRef = (el) => {
-    if (el) window._metodologiEl = el
-  }
-
   return (
     <div className="min-h-screen w-full" style={{ background: '#0d1421' }}>
-      <Navbar page={page} onPageChange={setPage} />
-
-      {page === 'beranda' && (
-        <>
-          <HeroSection villages={data.villages} />
-          <RankingTable villages={data.villages} provStats={data.provStats} />
-          <div ref={metodologiRef} id="metodologi">
-            <MethodologySection
-              explain={data.scoringExplain}
-              embedded={true}
-              villages={data.villages}
-            />
-          </div>
-          <ChartsSection
-            villages={data.villages}
-            provStats={data.provStats}
-            techStats={data.techStats}
-            scoreDist={data.scoreDist}
-            idmStatus={data.idmStatus}
-            scoringExplain={data.scoringExplain}
-            dataSources={data.dataSources}
-          />
-        </>
-      )}
-
-      {page === 'metodologi' && (
+      <Navbar />
+      <HeroSection summary={data.summary} />
+      <RankingTable provStats={data.provStats} />
+      <div id="metodologi">
         <MethodologySection
           explain={data.scoringExplain}
-          embedded={false}
-          onBack={() => setPage('beranda')}
+          embedded={true}
           villages={data.villages}
         />
-      )}
-
+      </div>
+      <ChartsSection
+        provStats={data.provStats}
+        techStats={data.techStats}
+        scoreDist={data.scoreDist}
+        idmStatus={data.idmStatus}
+        scoringExplain={data.scoringExplain}
+        dataSources={data.dataSources}
+      />
       <Footer />
     </div>
   )

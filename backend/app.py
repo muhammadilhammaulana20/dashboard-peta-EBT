@@ -29,11 +29,7 @@ def serve_static(path):
         return send_from_directory(FRONTEND_DIR, path)
     return send_from_directory(FRONTEND_DIR, "index.html")
 
-# Auto-generate data on import
-_data_path = os.path.join(os.path.dirname(__file__), "data", "villages.json")
-if not os.path.exists(_data_path):
-    from data.generate_data import generate
-    generate()
+
 
 if __name__ == "__main__":
     print("=" * 60)
