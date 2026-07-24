@@ -151,8 +151,8 @@ export default function MethodologySection({ explain, embedded, onBack }) {
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-2">Metode Analytic Hierarchy Process</h2>
           <p className="text-navy-400 mb-6 max-w-3xl">
-            AHP oleh Thomas L. Saaty (1980) — menguraikan keputusan kompleks menjadi perbandingan berpasangan 
-            antar kriteria, menghasilkan bobot objektif yang teruji konsistensinya.
+            Dikembangkan oleh Thomas L. Saaty pada tahun 1980, AHP menguraikan keputusan kompleks menjadi perbandingan berpasangan 
+            antar kriteria dan menghasilkan bobot objektif yang teruji konsistensinya.
           </p>
           {content}
         </div>
@@ -174,7 +174,7 @@ export default function MethodologySection({ explain, embedded, onBack }) {
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2">Metode Analytic Hierarchy Process (AHP)</h1>
         <p className="text-navy-400 mb-8 max-w-3xl">
-          AHP oleh Thomas L. Saaty (1980) — menguraikan keputusan kompleks menjadi perbandingan berpasangan.
+          Dikembangkan oleh Thomas L. Saaty pada tahun 1980, AHP menguraikan keputusan kompleks menjadi perbandingan berpasangan.
         </p>
         {content}
       </div>
